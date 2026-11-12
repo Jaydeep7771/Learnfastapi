@@ -1,0 +1,2210 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FastAPI Mastery Workbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#ffffff; --bg-sub:#fafafa; --bg-code:#f6f6f7; --bg-raised:#ffffff;
+  --fg:#0d0d0f; --fg-muted:#5c5f66; --fg-faint:#8a8d94;
+  --line:#e3e4e8; --line-strong:#cfd1d6;
+  --accent:#4f46e5; --accent-fg:#ffffff; --accent-soft:#eef0ff;
+  --ok:#0f7b4f; --ok-soft:#e6f6ee;
+  --warn:#9a5b00; --warn-soft:#fff3e0;
+  --bad:#b4232a; --bad-soft:#fdeceb;
+  --info:#0b6b8f; --info-soft:#e6f4f9;
+  --shadow:0 1px 2px rgba(10,10,15,.05);
+  --r:10px;
+}
+:root[data-theme="dark"]{
+  --bg:#08080a; --bg-sub:#0d0d11; --bg-code:#101014; --bg-raised:#0c0c10;
+  --fg:#f2f2f4; --fg-muted:#a1a4ad; --fg-faint:#71747d;
+  --line:#1e1f25; --line-strong:#2d2f37;
+  --accent:#8b86ff; --accent-fg:#0a0a0c; --accent-soft:#17172a;
+  --ok:#4ade80; --ok-soft:#0e2018;
+  --warn:#fbbf24; --warn-soft:#241c08;
+  --bad:#ff6b6b; --bad-soft:#260f10;
+  --info:#5cc8f5; --info-soft:#07202b;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font-family:"Plus Jakarta Sans",system-ui,sans-serif;
+  font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:"Space Grotesk",system-ui,sans-serif;letter-spacing:-.02em;line-height:1.2;margin:0}
+code,kbd,pre,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+hr{border:0;border-top:1px solid var(--line);margin:40px 0}
+
+/* layout */
+.shell{display:grid;grid-template-columns:290px minmax(0,1fr);gap:0;max-width:1480px;margin:0 auto}
+.sidebar{
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  border-right:1px solid var(--line);background:var(--bg-sub);
+  padding:22px 18px 60px;
+}
+main{min-width:0;padding:34px 44px 140px;max-width:960px}
+
+/* brand + theme */
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand-mark{width:28px;height:28px;flex:0 0 28px}
+.brand-title{font-family:"Space Grotesk";font-weight:700;font-size:15px}
+.brand-sub{font-size:11.5px;color:var(--fg-faint);letter-spacing:.02em;margin:0 0 18px 38px}
+.theme-toggle{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--bg-raised);border:1px solid var(--line);color:var(--fg-muted);
+  border-radius:8px;padding:7px 10px;font-size:11.5px;cursor:pointer;
+  font-family:"JetBrains Mono";letter-spacing:.02em;margin-bottom:16px;
+}
+.theme-toggle:hover{border-color:var(--line-strong);color:var(--fg)}
+
+/* progress */
+.progress-box{border:1px solid var(--line);border-radius:var(--r);background:var(--bg-raised);padding:12px;margin-bottom:20px}
+.progress-head{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-family:"JetBrains Mono";color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em}
+.progress-pct{color:var(--fg);font-weight:700;font-size:13px}
+.bar{height:5px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:9px}
+.bar>span{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease}
+.reset-btn{margin-top:9px;width:100%;background:transparent;border:1px solid var(--line);color:var(--fg-faint);
+  border-radius:6px;font-size:10.5px;font-family:"JetBrains Mono";padding:4px;cursor:pointer}
+.reset-btn:hover{color:var(--bad);border-color:var(--bad)}
+
+/* nav */
+nav .group{margin-bottom:18px}
+nav .group-label{
+  font-family:"JetBrains Mono";font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--fg-faint);padding:0 6px 7px;display:flex;gap:7px;align-items:center;
+}
+nav .group-label b{color:var(--accent);font-weight:700}
+nav ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+nav li{position:relative}
+nav a.nav-link{
+  display:flex;align-items:center;gap:8px;padding:5px 8px 5px 12px;font-size:13px;
+  color:var(--fg-muted);border-left:2px solid transparent;margin-left:-1px;
+}
+nav a.nav-link:hover{color:var(--fg);text-decoration:none;background:var(--accent-soft)}
+nav a.nav-link.active{color:var(--fg);border-left-color:var(--accent);font-weight:600;background:var(--accent-soft)}
+nav a.nav-link .dot{width:6px;height:6px;border-radius:99px;border:1px solid var(--line-strong);flex:0 0 6px}
+nav a.nav-link.done .dot{background:var(--ok);border-color:var(--ok)}
+nav a.nav-link.done{color:var(--fg-faint)}
+
+/* hero */
+.hero{border:1px solid var(--line);border-radius:14px;background:var(--bg-sub);padding:30px 32px;margin-bottom:34px}
+.hero h1{font-size:34px;margin-bottom:10px}
+.hero p{color:var(--fg-muted);margin:0 0 18px;max-width:64ch}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{
+  font-family:"JetBrains Mono";font-size:11px;padding:3px 9px;border-radius:99px;
+  border:1px solid var(--line-strong);color:var(--fg-muted);background:var(--bg-raised);
+}
+.chip.k{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+/* sections */
+section{scroll-margin-top:20px;padding-top:10px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin:46px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
+section:first-of-type .sec-head{border-top:0;margin-top:0}
+.sec-head .idx{
+  font-family:"JetBrains Mono";font-size:11px;color:var(--fg-faint);
+  border:1px solid var(--line);border-radius:6px;padding:2px 7px;margin-top:5px;white-space:nowrap
+}
+.sec-head h2{font-size:24px;flex:1}
+.sec-head .tagline{color:var(--fg-muted);font-size:13.5px;margin-top:4px}
+.lesson-check{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none;
+  font-family:"JetBrains Mono";font-size:11px;color:var(--fg-muted);
+  border:1px solid var(--line);border-radius:7px;padding:5px 9px;background:var(--bg-raised);white-space:nowrap
+}
+.lesson-check:hover{border-color:var(--line-strong);color:var(--fg)}
+.lesson-check input{accent-color:var(--accent);margin:0;width:13px;height:13px}
+.lesson-check.on{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+
+/* WWH cards */
+.card{border:1px solid var(--line);border-radius:12px;background:var(--bg-raised);margin:18px 0;overflow:hidden}
+.card>header{padding:14px 18px;border-bottom:1px solid var(--line);background:var(--bg-sub)}
+.card>header h3{font-size:16.5px}
+.card>header .sub{font-size:12.5px;color:var(--fg-faint);font-family:"JetBrains Mono";margin-top:3px}
+.card-body{padding:16px 18px}
+.wwh{display:grid;gap:12px;margin-bottom:4px}
+.wwh .block{border:1px solid var(--line);border-left-width:3px;border-radius:9px;padding:11px 13px;background:var(--bg-sub)}
+.wwh .block .lbl{
+  font-family:"JetBrains Mono";font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  display:block;margin-bottom:4px;font-weight:700
+}
+.wwh .what{border-left-color:var(--info)} .wwh .what .lbl{color:var(--info)}
+.wwh .why{border-left-color:var(--warn)} .wwh .why .lbl{color:var(--warn)}
+.wwh .how{border-left-color:var(--ok)} .wwh .how .lbl{color:var(--ok)}
+.wwh p{margin:0}
+.wwh p + p{margin-top:7px}
+
+/* code */
+.codeblock{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0;background:var(--bg-code)}
+.codebar{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--line);
+  background:var(--bg-sub);font-family:"JetBrains Mono";font-size:10.5px;color:var(--fg-faint)
+}
+.badge{
+  font-family:"JetBrains Mono";font-size:10px;padding:2px 7px;border-radius:5px;
+  border:1px solid var(--line-strong);color:var(--fg-muted);white-space:nowrap
+}
+.badge.zsh{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.badge.py{border-color:var(--info);color:var(--info);background:var(--info-soft)}
+.badge.curl{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.codebar .path{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy{
+  border:1px solid var(--line-strong);background:var(--bg-raised);color:var(--fg-muted);
+  font-family:"JetBrains Mono";font-size:10px;padding:3px 8px;border-radius:5px;cursor:pointer
+}
+.copy:hover{color:var(--fg);border-color:var(--accent)}
+.copy.copied{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+pre{margin:0;padding:13px 15px;overflow-x:auto;font-size:12.5px;line-height:1.66;tab-size:4}
+pre code{color:var(--fg);white-space:pre}
+.cmt{color:var(--fg-faint);font-style:normal}
+.kw{color:var(--accent)} .str{color:var(--ok)} .fn{color:var(--info)} .ann{color:var(--warn)}
+p code,li code,td code{background:var(--bg-code);border:1px solid var(--line);border-radius:5px;padding:.5px 5px;font-size:12.5px}
+
+/* callouts */
+.note{border:1px solid var(--line);border-left:3px solid var(--info);border-radius:9px;padding:11px 14px;margin:14px 0;background:var(--info-soft);font-size:13.5px}
+.note.danger{border-left-color:var(--bad);background:var(--bad-soft)}
+.note.gotcha{border-left-color:var(--warn);background:var(--warn-soft)}
+.note b{font-family:"Space Grotesk"}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--bg-sub);font-family:"JetBrains Mono";font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted);font-weight:500}
+
+/* figures */
+figure{margin:16px 0;border:1px solid var(--line);border-radius:10px;background:var(--bg-sub);padding:16px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:11.5px;color:var(--fg-faint);font-family:"JetBrains Mono";margin-top:10px;text-align:center}
+.svg-lbl{font-family:"JetBrains Mono";font-size:9.5px;fill:var(--fg-muted)}
+.svg-ttl{font-family:"Space Grotesk";font-size:11px;font-weight:600;fill:var(--fg)}
+.svg-box{fill:var(--bg-raised);stroke:var(--line-strong)}
+.svg-box-a{fill:var(--accent-soft);stroke:var(--accent)}
+.svg-arrow{stroke:var(--fg-faint);fill:none}
+.svg-bad{stroke:var(--bad);fill:var(--bad-soft)}
+.svg-ok{stroke:var(--ok);fill:var(--ok-soft)}
+
+/* simulator */
+.sim{border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-sub);overflow:hidden;margin:18px 0}
+.sim-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.sim-head h4{font-size:14px;flex:1;min-width:180px}
+.modes{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px 0}
+.mode{
+  font-family:"JetBrains Mono";font-size:11px;padding:6px 10px;border-radius:7px;cursor:pointer;
+  border:1px solid var(--line-strong);background:var(--bg-raised);color:var(--fg-muted)
+}
+.mode:hover{color:var(--fg)}
+.mode.sel{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:700}
+.sim-body{padding:14px}
+.sim-explain{font-size:13px;color:var(--fg-muted);min-height:40px;border-left:3px solid var(--accent);padding-left:11px;margin-bottom:12px}
+.lanes{display:grid;gap:5px}
+.lane{display:grid;grid-template-columns:122px 1fr;gap:9px;align-items:center}
+.lane .name{font-family:"JetBrains Mono";font-size:10.5px;color:var(--fg-faint);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{position:relative;height:17px;border:1px solid var(--line);border-radius:5px;background:var(--bg-raised);overflow:hidden}
+.track .seg{position:absolute;top:0;bottom:0;border-radius:3px;opacity:.92}
+.seg.run{background:var(--accent)}
+.seg.wait{background:repeating-linear-gradient(45deg,var(--line),var(--line) 4px,transparent 4px,transparent 8px)}
+.seg.block{background:var(--bad)}
+.seg.hb{background:var(--ok)}
+.seg .tag{position:absolute;left:5px;top:-1px;font-family:"JetBrains Mono";font-size:9px;color:var(--accent-fg);line-height:17px}
+.playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--fg);opacity:.55;z-index:3}
+.axis{display:grid;grid-template-columns:122px 1fr;gap:9px;margin-top:6px}
+.ticks{display:flex;justify-content:space-between;font-family:"JetBrains Mono";font-size:9.5px;color:var(--fg-faint)}
+.btn{
+  font-family:"JetBrains Mono";font-size:11.5px;padding:7px 14px;border-radius:7px;cursor:pointer;
+  background:var(--accent);color:var(--accent-fg);border:1px solid var(--accent);font-weight:700
+}
+.btn.ghost{background:transparent;color:var(--fg-muted);border-color:var(--line-strong);font-weight:400}
+.btn.ghost:hover{color:var(--fg)}
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-top:14px}
+.stat{border:1px solid var(--line);border-radius:9px;background:var(--bg-raised);padding:9px 11px}
+.stat .k{font-family:"JetBrains Mono";font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-faint)}
+.stat .v{font-family:"Space Grotesk";font-size:19px;font-weight:700;margin-top:2px}
+.stat.bad .v{color:var(--bad)} .stat.ok .v{color:var(--ok)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-family:"JetBrains Mono";font-size:10px;color:var(--fg-faint)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+footer{border-top:1px solid var(--line);margin-top:60px;padding-top:18px;color:var(--fg-faint);font-size:12.5px}
+
+@media (max-width:1000px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  main{padding:24px 16px 90px}
+  .lane{grid-template-columns:86px 1fr}.axis{grid-template-columns:86px 1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ============================== SIDEBAR ============================== -->
+<aside class="sidebar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="1" y="1" width="30" height="30" rx="8" fill="none" stroke="var(--line-strong)"/>
+      <path d="M17 5 L8 18 h6 l-1 9 9-13 h-6 z" fill="var(--accent)"/>
+    </svg>
+    <span class="brand-title">FastAPI Mastery</span>
+  </div>
+  <p class="brand-sub">macOS · uv · Python 3.13</p>
+
+  <button class="theme-toggle" id="themeBtn">
+    <span id="themeLabel">dark mode</span><span aria-hidden="true">◐</span>
+  </button>
+
+  <div class="progress-box">
+    <div class="progress-head"><span>progress</span><span class="progress-pct" id="pctLabel">0%</span></div>
+    <div class="bar"><span id="barFill"></span></div>
+    <button class="reset-btn" id="resetBtn">reset tracker</button>
+  </div>
+
+  <nav id="nav">
+    <div class="group">
+      <div class="group-label"><b>Phase 0</b> macOS + uv DX</div>
+      <ul>
+        <li><a class="nav-link" href="#p0-uv"><span class="dot"></span>Why uv replaces the lot</a></li>
+        <li><a class="nav-link" href="#p0-init"><span class="dot"></span>Init &amp; add dependencies</a></li>
+        <li><a class="nav-link" href="#p0-run"><span class="dot"></span>Run, /docs, curl</a></li>
+        <li><a class="nav-link" href="#p0-structure"><span class="dot"></span>Project structure</a></li>
+      </ul>
+    </div>
+    <div class="group">
+      <div class="group-label"><b>Module 1</b> Core Backend</div>
+      <ul>
+        <li><a class="nav-link" href="#m1-pydantic"><span class="dot"></span>Pydantic v2 boundary</a></li>
+        <li><a class="nav-link" href="#m1-depends"><span class="dot"></span>Dependency injection</a></li>
+        <li><a class="nav-link" href="#m1-crud"><span class="dot"></span>Async CRUD · SQLAlchemy 2.0</a></li>
+        <li><a class="nav-link" href="#m1-auth"><span class="dot"></span>Auth, JWT &amp; RBAC</a></li>
+        <li><a class="nav-link" href="#m1-concurrency"><span class="dot"></span>Async vs threads vs procs</a></li>
+        <li><a class="nav-link" href="#m1-middleware"><span class="dot"></span>Middleware, errors, lifespan</a></li>
+      </ul>
+    </div>
+    <div class="group">
+      <div class="group-label"><b>Module 2</b> AI · RAG · Agents</div>
+      <ul>
+        <li><a class="nav-link" href="#m2-stream"><span class="dot"></span>Streaming &amp; SSE</a></li>
+        <li><a class="nav-link" href="#m2-rag"><span class="dot"></span>RAG pipeline</a></li>
+        <li><a class="nav-link" href="#m2-agent"><span class="dot"></span>LangGraph agent</a></li>
+      </ul>
+    </div>
+  </nav>
+</aside>
+
+<!-- ============================== MAIN ============================== -->
+<main>
+
+<div class="hero">
+  <h1>Production FastAPI, from first principles</h1>
+  <p>Thirteen lessons, each one <b>What</b> it is, <b>Why</b> it matters, and <b>How</b> it works under the hood — paired with a runnable reference project in this same folder. Every snippet here exists in <code>app/</code>; every command is copy-ready for zsh on Apple Silicon.</p>
+  <div class="chips">
+    <span class="chip k">uv only — no pip/poetry/venv</span>
+    <span class="chip">Python 3.13</span>
+    <span class="chip">SQLAlchemy 2.0 async</span>
+    <span class="chip">Argon2 + JWT</span>
+    <span class="chip">SSE streaming</span>
+    <span class="chip">ChromaDB RAG</span>
+    <span class="chip">LangGraph StateGraph</span>
+  </div>
+</div>
+
+<div class="note">
+  <b>How to use this workbook.</b> Keep this page on one side and a zsh split on the other. Tick a lesson only after you have run its endpoint in <code>/docs</code> or via <code>curl</code> — the tracker is stored in your browser's localStorage, so it survives reloads.
+</div>
+
+<!-- ======================================================= PHASE 0 ===== -->
+
+<section id="p0-uv">
+  <div class="sec-head">
+    <span class="idx">P0.1</span>
+    <div>
+      <h2>Why <code>uv</code> replaces pip, venv, pyenv and poetry</h2>
+      <div class="tagline">One Rust binary owns interpreters, locking, and execution.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="p0-uv" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>The single-tool workflow</h3><div class="sub">uv init · uv add · uv run</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p><code>uv</code> is a Rust-written package and project manager that resolves, downloads and links dependencies into a project-local <code>.venv</code>, and also installs CPython itself. It replaces the <code>pyenv + venv + pip + pip-tools + poetry</code> stack with one binary.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>Two failure modes disappear. First, <b>"works on my Mac"</b>: <code>uv.lock</code> pins the full transitive graph with hashes, so CI and your laptop resolve byte-identically. Second, <b>wrong-interpreter bugs</b>: you never <code>source activate</code> anything. <code>uv run</code> resolves the environment per invocation, so a stale shell cannot point you at system Python 3.9 and silently break <code>type |</code> syntax.</p>
+          <p>Speed is the side effect, not the point: a global cache plus hardlinking means a cold install of FastAPI's full stack lands in seconds instead of a minute.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p>Each <code>uv add</code> edits <code>pyproject.toml</code>, re-resolves the graph into <code>uv.lock</code>, then syncs <code>.venv</code> to match. <code>uv run CMD</code> performs that sync check first (microseconds when already current), then execs <code>CMD</code> with <code>.venv/bin</code> ahead of <code>PATH</code>.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 180" role="img" aria-label="uv resolves pyproject into a lockfile and a project venv, which uv run executes against">
+          <rect class="svg-box" x="8" y="60" width="132" height="54" rx="8"/>
+          <text class="svg-ttl" x="74" y="83" text-anchor="middle">pyproject.toml</text>
+          <text class="svg-lbl" x="74" y="99" text-anchor="middle">declared ranges</text>
+
+          <rect class="svg-box-a" x="200" y="46" width="128" height="82" rx="8"/>
+          <text class="svg-ttl" x="264" y="72" text-anchor="middle">uv resolver</text>
+          <text class="svg-lbl" x="264" y="89" text-anchor="middle">PubGrub SAT solve</text>
+          <text class="svg-lbl" x="264" y="104" text-anchor="middle">global wheel cache</text>
+
+          <rect class="svg-box" x="392" y="18" width="136" height="50" rx="8"/>
+          <text class="svg-ttl" x="460" y="40" text-anchor="middle">uv.lock</text>
+          <text class="svg-lbl" x="460" y="55" text-anchor="middle">exact + hashed · commit it</text>
+
+          <rect class="svg-box" x="392" y="104" width="136" height="50" rx="8"/>
+          <text class="svg-ttl" x="460" y="126" text-anchor="middle">.venv/</text>
+          <text class="svg-lbl" x="460" y="141" text-anchor="middle">hardlinks · gitignored</text>
+
+          <rect class="svg-box-a" x="580" y="60" width="112" height="54" rx="8"/>
+          <text class="svg-ttl" x="636" y="83" text-anchor="middle">uv run</text>
+          <text class="svg-lbl" x="636" y="99" text-anchor="middle">no activation</text>
+
+          <g class="svg-arrow" stroke-width="1.2" marker-end="url(#ah)">
+            <path d="M140 87 H196"/><path d="M328 70 H388"/><path d="M328 104 H388"/>
+            <path d="M528 43 C556 43 556 80 576 83"/><path d="M528 129 C556 129 556 95 576 91"/>
+          </g>
+          <defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0 L8 4 L0 8 z" fill="var(--fg-faint)"/></marker></defs>
+        </svg>
+        <figcaption>Declared ranges → solved lock → synced venv → executed command. No step you perform by hand.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge zsh">macOS zsh</span><span class="path">install uv (Apple Silicon)</span><button class="copy">copy</button></div>
+<pre><code><span class="cmt"># Homebrew, or the standalone installer — either way, one binary.</span>
+brew install uv
+uv --version</code></pre>
+      </div>
+
+      <div class="note gotcha"><b>Mental model shift.</b> Prefix commands with <code>uv run</code> instead of activating anything. <code>uv run python</code>, <code>uv run pytest</code>, <code>uv run fastapi dev</code>. If a tutorial says <code>pip install</code>, translate it to <code>uv add</code>.</div>
+    </div>
+  </div>
+</section>
+
+<section id="p0-init">
+  <div class="sec-head">
+    <span class="idx">P0.2</span>
+    <div>
+      <h2>Initialise the project and add dependencies</h2>
+      <div class="tagline">Runtime deps, dev deps, and the optional AI extra — kept apart on purpose.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="p0-init" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>Scaffolding in four commands</h3><div class="sub">--no-package keeps it an app, not a library</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p><code>uv init --no-package</code> creates a <i>non-packaged</i> project: a <code>pyproject.toml</code> plus a pinned interpreter, with no build backend and no <code>src/</code> wheel layout. <code>uv add</code> then writes dependencies into the right table.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>A deployable service is not a library. Omitting the build backend means no editable-install step and no import path surprises — <code>app/</code> is simply a package in the project root.</p>
+          <p>Splitting <b>runtime</b> vs <b>dev</b> vs <b>ai</b> is a deployment decision: <code>ruff</code> and <code>pytest</code> never ship to production, and the heavy AI stack (chromadb pulls onnxruntime) stays optional so Module 1 installs small and fast.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p><code>uv add X</code> → <code>[project.dependencies]</code>. <code>uv add --dev X</code> → <code>[dependency-groups].dev</code>, installed locally but excluded by <code>uv sync --no-dev</code>. <code>uv add --optional ai X</code> → an extra you opt into with <code>--extra ai</code>.</p>
+        </div>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge zsh">macOS zsh</span><span class="path">scaffold + runtime deps</span><button class="copy">copy</button></div>
+<pre><code>uv init --no-package --python 3.13 fastapi-mastery
+cd fastapi-mastery
+
+<span class="cmt"># fastapi[standard] = uvicorn, the `fastapi` CLI, pydantic, python-multipart, jinja2</span>
+uv add "fastapi[standard]" sqlalchemy aiosqlite pydantic-settings pyjwt pwdlib[argon2] httpx
+
+<span class="cmt"># dev-only: never shipped</span>
+uv add --dev pytest pytest-asyncio ruff</code></pre>
+      </div>
+
+      <div class="note"><b>One addition to the brief.</b> SQLAlchemy's async layer needs <code>greenlet</code> to bridge its sync internals to <code>await</code>. Declare it explicitly via the extra — <code>uv add "sqlalchemy[asyncio]"</code> — rather than relying on it arriving transitively.</div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge zsh">macOS zsh</span><span class="path">Module 2 — add when you reach it</span><button class="copy">copy</button></div>
+<pre><code>uv add langchain langchain-openai langchain-community langgraph chromadb pypdf
+
+<span class="cmt"># …or keep them optional so Module 1 stays lean:</span>
+uv add --optional ai langchain langchain-openai langchain-community langgraph chromadb pypdf
+uv sync --extra ai</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">pyproject.toml</span><span class="path">what those commands produce</span><button class="copy">copy</button></div>
+<pre><code>[project]
+name = <span class="str">"fastapi-mastery"</span>
+requires-python = <span class="str">"&gt;=3.13"</span>
+dependencies = [
+    <span class="str">"fastapi[standard]&gt;=0.115"</span>,
+    <span class="str">"sqlalchemy[asyncio]&gt;=2.0.36"</span>,  <span class="cmt"># [asyncio] pulls greenlet</span>
+    <span class="str">"aiosqlite&gt;=0.20"</span>,
+    <span class="str">"pydantic-settings&gt;=2.6"</span>,
+    <span class="str">"pyjwt&gt;=2.9"</span>,
+    <span class="str">"pwdlib[argon2]&gt;=0.2.1"</span>,
+    <span class="str">"httpx&gt;=0.28"</span>,
+]
+
+[project.optional-dependencies]
+ai = [<span class="str">"langchain&gt;=0.3"</span>, <span class="str">"langchain-openai&gt;=0.2"</span>, <span class="str">"langgraph&gt;=0.2"</span>, <span class="str">"chromadb&gt;=0.5"</span>, <span class="str">"pypdf&gt;=5.1"</span>]
+
+[dependency-groups]
+dev = [<span class="str">"pytest&gt;=8.3"</span>, <span class="str">"pytest-asyncio&gt;=0.24"</span>, <span class="str">"ruff&gt;=0.8"</span>]</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="p0-run">
+  <div class="sec-head">
+    <span class="idx">P0.3</span>
+    <div>
+      <h2>Run it, then prove it from the terminal</h2>
+      <div class="tagline">Swagger UI for exploring; curl for the things Swagger hides.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="p0-run" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3><code>uv run fastapi dev</code> and the OpenAPI loop</h3><div class="sub">localhost:8000/docs</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p><code>fastapi dev</code> is a thin wrapper over <code>uvicorn --reload</code> that finds your <code>FastAPI()</code> instance by import string. <code>/docs</code> is Swagger UI rendered from the OpenAPI schema FastAPI generates out of your type hints.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>The schema is <i>derived</i>, not maintained. Your Pydantic models and signatures are the single source of truth, so docs cannot drift from behaviour — the classic rot of hand-written API docs.</p>
+          <p>Reach for <code>curl</code> anyway: Swagger normalises away raw headers, buffers streaming responses, and hides exactly what you need to see for SSE and for the concurrency lab.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p>Reload uses a filesystem watcher: on save, the worker process is killed and re-imported. That means module-level state is lost on every edit — one more reason resources belong in <code>lifespan</code>, not globals.</p>
+        </div>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge zsh">macOS zsh</span><span class="path">run · lint · test</span><button class="copy">copy</button></div>
+<pre><code>cp .env.example .env
+uv run fastapi dev app/main.py        <span class="cmt"># http://127.0.0.1:8000/docs</span>
+
+uv run ruff check . --fix
+uv run pytest -q</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge curl">curl</span><span class="path">register → login → authenticated call</span><button class="copy">copy</button></div>
+<pre><code>curl -s localhost:8000/health | python3 -m json.tool
+
+curl -s -X POST localhost:8000/auth/register \
+  -H <span class="str">"content-type: application/json"</span> \
+  -d <span class="str">'{"email":"admin@example.com","password":"Sup3rSecret!","role":"admin"}'</span>
+
+<span class="cmt"># OAuth2 password grant is FORM-encoded, not JSON. Field is `username`.</span>
+TOKEN=$(curl -s -X POST localhost:8000/auth/login \
+  -d <span class="str">"username=admin@example.com&amp;password=Sup3rSecret!"</span> | python3 -c <span class="str">'import sys,json;print(json.load(sys.stdin)["access_token"])'</span>)
+
+curl -s localhost:8000/auth/me -H <span class="str">"authorization: Bearer $TOKEN"</span></code></pre>
+      </div>
+
+      <div class="note gotcha"><b>Why <code>/auth/login</code> rejects your JSON.</b> The OAuth2 password flow is specified over <code>application/x-www-form-urlencoded</code>, which is why the route depends on <code>OAuth2PasswordRequestForm</code> and the field is <code>username</code> even though it holds an email. Send <code>-d "username=…&amp;password=…"</code>, with no JSON content-type.</div>
+    </div>
+  </div>
+</section>
+
+<section id="p0-structure">
+  <div class="sec-head">
+    <span class="idx">P0.4</span>
+    <div>
+      <h2>Project structure that survives growth</h2>
+      <div class="tagline">Layer by responsibility, and let imports only ever point downward.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="p0-structure" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>routers / schemas / models / services / core</h3><div class="sub">the dependency rule</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>Five layers with one job each: <code>routers/</code> speaks HTTP, <code>schemas/</code> defines the wire contract, <code>services/</code> holds business logic, <code>models/</code> maps the database, <code>core/</code> owns cross-cutting concerns (config, security, errors, middleware). <code>dependencies.py</code> is the wiring.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>The rule that earns its keep: <b>imports point downward only</b>. Routers import services; services never import routers. So business logic has no idea HTTP exists and is directly unit-testable, and swapping SQLite for Postgres touches <code>models/</code> and <code>core/config.py</code> and nothing else.</p>
+          <p>It also kills circular imports — the most common way a growing FastAPI app becomes unrefactorable.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p>Each router is an <code>APIRouter(prefix=…, tags=[…])</code> that <code>main.py</code> mounts with <code>include_router</code>. The prefix lives with the router, so a route never has to know where it is mounted.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 250" role="img" aria-label="Layered architecture with imports flowing downward only">
+          <rect class="svg-box-a" x="150" y="8" width="400" height="38" rx="7"/>
+          <text class="svg-ttl" x="350" y="26" text-anchor="middle">routers/ — HTTP only: status codes, params, response_model</text>
+          <text class="svg-lbl" x="350" y="40" text-anchor="middle">auth · items · concurrency · ai</text>
+
+          <rect class="svg-box" x="150" y="62" width="193" height="38" rx="7"/>
+          <text class="svg-ttl" x="246" y="80" text-anchor="middle">schemas/ — the contract</text>
+          <text class="svg-lbl" x="246" y="93" text-anchor="middle">Pydantic in / out</text>
+
+          <rect class="svg-box" x="357" y="62" width="193" height="38" rx="7"/>
+          <text class="svg-ttl" x="453" y="80" text-anchor="middle">dependencies.py</text>
+          <text class="svg-lbl" x="453" y="93" text-anchor="middle">session · current_user · require_role</text>
+
+          <rect class="svg-box" x="150" y="116" width="400" height="38" rx="7"/>
+          <text class="svg-ttl" x="350" y="134" text-anchor="middle">services/ — business logic, zero HTTP imports</text>
+          <text class="svg-lbl" x="350" y="147" text-anchor="middle">items · heavy · llm · rag · agent_graph</text>
+
+          <rect class="svg-box" x="150" y="170" width="400" height="38" rx="7"/>
+          <text class="svg-ttl" x="350" y="188" text-anchor="middle">models/ + db/ — SQLAlchemy mappers &amp; AsyncSession</text>
+
+          <rect class="svg-box" x="10" y="8" width="118" height="200" rx="7"/>
+          <text class="svg-ttl" x="69" y="100" text-anchor="middle">core/</text>
+          <text class="svg-lbl" x="69" y="118" text-anchor="middle">config · security</text>
+          <text class="svg-lbl" x="69" y="132" text-anchor="middle">problems · middleware</text>
+          <text class="svg-lbl" x="69" y="150" text-anchor="middle">(imported by all)</text>
+
+          <g class="svg-arrow" stroke-width="1.2" marker-end="url(#ah2)">
+            <path d="M350 46 V58"/><path d="M350 100 V112"/><path d="M350 154 V166"/>
+          </g>
+          <text class="svg-lbl" x="572" y="110">imports flow ↓ only</text>
+          <defs><marker id="ah2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0 L8 4 L0 8 z" fill="var(--fg-faint)"/></marker></defs>
+        </svg>
+        <figcaption>A router may reach down; nothing may reach up. <code>core/</code> is the only module everyone imports.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge zsh">macOS zsh</span><span class="path">the tree in this folder</span><button class="copy">copy</button></div>
+<pre><code>app/
+├── main.py              <span class="cmt"># assembly only: lifespan, middleware, handlers, include_router</span>
+├── dependencies.py      <span class="cmt"># SessionDep, CurrentUser, Pagination, require_role()</span>
+├── core/
+│   ├── config.py        <span class="cmt"># pydantic-settings, @lru_cache</span>
+│   ├── security.py      <span class="cmt"># Argon2 hashing + JWT encode/decode</span>
+│   ├── problems.py      <span class="cmt"># RFC 9457 handlers</span>
+│   └── middleware.py    <span class="cmt"># pure-ASGI timing + correlation id</span>
+├── db/session.py        <span class="cmt"># engine, sessionmaker, get_session()</span>
+├── models/              <span class="cmt"># User, Item (DB truth)</span>
+├── schemas/             <span class="cmt"># UserCreate/UserRead, ItemCreate/Update/Read (wire truth)</span>
+├── routers/             <span class="cmt"># auth, items, concurrency, ai</span>
+└── services/            <span class="cmt"># items, heavy, llm, rag, agent_graph</span>
+tests/test_api.py        <span class="cmt"># ASGI-transport end-to-end, no live server</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= MODULE 1 ===== -->
+
+<section id="m1-pydantic">
+  <div class="sec-head">
+    <span class="idx">M1.1</span>
+    <div>
+      <h2>Pydantic v2: validation, serialization, and the leak firewall</h2>
+      <div class="tagline">Separate input, output and storage models — or leak a password hash.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m1-pydantic" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>Three models per resource</h3><div class="sub">app/schemas/user.py · app/schemas/item.py</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>Pydantic v2 compiles your annotations into a Rust validator (<code>pydantic-core</code>) that coerces and checks every request body, and a serializer that builds every response. <code>response_model</code> runs that serializer on whatever the route returns.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p><b>The failure mode it prevents is a data leak.</b> Return an ORM <code>User</code> through <code>response_model=UserRead</code> and only the fields <i>declared on UserRead</i> are serialized. <code>hashed_password</code> is not declared, so it cannot escape — even though the object in memory carries it. Reuse one model for DB and API and the next column you add (<code>stripe_customer_id</code>, <code>internal_notes</code>) ships to clients silently.</p>
+          <p>Validation also runs at the edge, so your service layer never defends against <code>None</code>, negative prices or 10&nbsp;MB strings. And v2's validation core is native code: it is typically an order of magnitude faster than v1, which matters once bodies get large.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p><code>Annotated[str, Field(min_length=2)]</code> becomes a reusable type <i>and</i> an OpenAPI constraint. <code>field_validator</code> hooks custom rules. <code>ConfigDict(from_attributes=True)</code> lets the serializer read ORM attributes. <code>computed_field</code> adds derived output that was never stored.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 180" role="img" aria-label="Request validated into a create schema, stored as an ORM model, serialized out through a read schema that omits secrets">
+          <rect class="svg-box" x="6" y="62" width="104" height="52" rx="7"/>
+          <text class="svg-ttl" x="58" y="84" text-anchor="middle">JSON body</text>
+          <text class="svg-lbl" x="58" y="99" text-anchor="middle">untrusted</text>
+
+          <rect class="svg-box-a" x="146" y="56" width="120" height="64" rx="7"/>
+          <text class="svg-ttl" x="206" y="79" text-anchor="middle">UserCreate</text>
+          <text class="svg-lbl" x="206" y="94" text-anchor="middle">email, password</text>
+          <text class="svg-lbl" x="206" y="108" text-anchor="middle">422 on failure</text>
+
+          <rect class="svg-box" x="302" y="46" width="128" height="86" rx="7"/>
+          <text class="svg-ttl" x="366" y="68" text-anchor="middle">User (ORM)</text>
+          <text class="svg-lbl" x="366" y="84" text-anchor="middle">id, email, role</text>
+          <text class="svg-lbl" x="366" y="98" text-anchor="middle" fill="var(--bad)">hashed_password</text>
+          <text class="svg-lbl" x="366" y="112" text-anchor="middle" fill="var(--bad)">internal fields</text>
+
+          <rect class="svg-ok" x="466" y="56" width="120" height="64" rx="7" stroke-width="1.4"/>
+          <text class="svg-ttl" x="526" y="79" text-anchor="middle">UserRead</text>
+          <text class="svg-lbl" x="526" y="94" text-anchor="middle">id, email, role</text>
+          <text class="svg-lbl" x="526" y="108" text-anchor="middle">+ created_at</text>
+
+          <rect class="svg-box" x="620" y="62" width="74" height="52" rx="7"/>
+          <text class="svg-ttl" x="657" y="84" text-anchor="middle">200 OK</text>
+          <text class="svg-lbl" x="657" y="99" text-anchor="middle">safe</text>
+
+          <g class="svg-arrow" stroke-width="1.2" marker-end="url(#ah3)">
+            <path d="M110 88 H142"/><path d="M266 88 H298"/><path d="M430 88 H462"/><path d="M586 88 H616"/>
+          </g>
+          <text class="svg-lbl" x="446" y="26" text-anchor="middle" fill="var(--ok)">undeclared fields are dropped here ↓</text>
+          <path d="M446 32 V50" class="svg-arrow" stroke="var(--ok)" stroke-width="1.2" marker-end="url(#ahok)"/>
+          <defs>
+            <marker id="ah3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--fg-faint)"/></marker>
+            <marker id="ahok" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--ok)"/></marker>
+          </defs>
+        </svg>
+        <figcaption>The response schema is a whitelist. That is the whole defence — and it is structural, not a review habit.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/schemas/user.py</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">from</span> typing <span class="kw">import</span> Annotated, Literal
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+Password = Annotated[str, Field(min_length=<span class="ann">10</span>, max_length=<span class="ann">128</span>)]
+
+<span class="kw">class</span> <span class="fn">UserCreate</span>(BaseModel):
+    <span class="cmt">"""INPUT only. Accepts a raw password no output schema can echo."""</span>
+    email: EmailStr
+    password: Password
+    role: Literal[<span class="str">"user"</span>, <span class="str">"admin"</span>] = <span class="str">"user"</span>
+
+    <span class="ann">@field_validator</span>(<span class="str">"password"</span>)
+    <span class="ann">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">password_strength</span>(cls, v: str) -&gt; str:
+        <span class="kw">if</span> v.lower() == v <span class="kw">or</span> v.upper() == v:
+            <span class="kw">raise</span> ValueError(<span class="str">"password must mix upper and lower case"</span>)
+        <span class="kw">if</span> <span class="kw">not</span> any(c.isdigit() <span class="kw">for</span> c <span class="kw">in</span> v):
+            <span class="kw">raise</span> ValueError(<span class="str">"password must contain a digit"</span>)
+        <span class="kw">return</span> v
+
+<span class="kw">class</span> <span class="fn">UserRead</span>(BaseModel):
+    <span class="cmt">"""OUTPUT only. hashed_password is undeclared -&gt; structurally unleakable."""</span>
+    model_config = ConfigDict(from_attributes=<span class="kw">True</span>)   <span class="cmt"># read ORM attributes</span>
+    id: int
+    email: EmailStr
+    role: str
+    created_at: datetime</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/schemas/item.py — PATCH semantics &amp; derived output</span><button class="copy">copy</button></div>
+<pre><code>PriceCents = Annotated[int, Field(ge=<span class="ann">0</span>, le=<span class="ann">10_000_00</span>)]
+
+<span class="kw">class</span> <span class="fn">ItemUpdate</span>(BaseModel):
+    <span class="cmt">"""Every field optional. Pair with model_dump(exclude_unset=True) so that</span>
+<span class="cmt">    "field absent" and "field explicitly set to null" stay different things."""</span>
+    name: Name | <span class="kw">None</span> = <span class="kw">None</span>
+    description: str | <span class="kw">None</span> = Field(default=<span class="kw">None</span>, max_length=<span class="ann">2000</span>)
+    price_cents: PriceCents | <span class="kw">None</span> = <span class="kw">None</span>
+
+<span class="kw">class</span> <span class="fn">ItemRead</span>(BaseModel):
+    model_config = ConfigDict(from_attributes=<span class="kw">True</span>)
+    id: int; name: str; price_cents: int; owner_id: int
+
+    <span class="ann">@computed_field</span>            <span class="cmt"># serialized, never stored, shows up in OpenAPI</span>
+    <span class="ann">@property</span>
+    <span class="kw">def</span> <span class="fn">price_display</span>(self) -&gt; str:
+        <span class="kw">return</span> f<span class="str">"${self.price_cents / 100:,.2f}"</span>
+
+<span class="kw">class</span> <span class="fn">Page</span>[T: BaseModel](BaseModel):
+    <span class="cmt">"""Generic envelope: every list endpoint paginates identically."""</span>
+    items: list[T]; total: int; limit: int; offset: int</code></pre>
+      </div>
+
+      <div class="note gotcha"><b>Money is an integer.</b> <code>price_cents: int</code>, never <code>float</code>. Binary floats cannot represent <code>0.10</code>, so float money accumulates rounding error the moment you sum a cart. Store the smallest unit; format at the edge with <code>computed_field</code>.</div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge curl">curl</span><span class="path">watch validation reject it</span><button class="copy">copy</button></div>
+<pre><code><span class="cmt"># name too short + price above the ceiling -&gt; 422 with field-level detail</span>
+curl -s -X POST localhost:8000/items -H <span class="str">"authorization: Bearer $TOKEN"</span> \
+  -H <span class="str">"content-type: application/json"</span> \
+  -d <span class="str">'{"name":"x","price_cents":99999999}'</span> | python3 -m json.tool</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="m1-depends">
+  <div class="sec-head">
+    <span class="idx">M1.2</span>
+    <div>
+      <h2>Dependency injection with <code>Depends</code></h2>
+      <div class="tagline">A typed graph resolved per request — and overridable in tests.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m1-depends" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>Composition, caching, and <code>yield</code> teardown</h3><div class="sub">app/dependencies.py · app/db/session.py</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p><code>Depends(fn)</code> declares that a route needs whatever <code>fn</code> returns. FastAPI inspects the signature, builds a graph of sub-dependencies, resolves it before calling your handler, and runs teardown afterwards.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>Versus a service locator (<code>get_db()</code> called inside the function) you gain three things. <b>Declared</b>: the graph is in the signature, so the type checker and OpenAPI both see it — a <code>Depends(oauth2_scheme)</code> is what puts the padlock in <code>/docs</code>. <b>Cached</b>: each dependency resolves once per request, so <code>require_role("admin")</code> layered on <code>get_current_user</code> does not re-decode the JWT or re-query the user. <b>Substitutable</b>: <code>app.dependency_overrides[get_session] = fake</code> replaces a node for tests with no monkeypatching.</p>
+          <p>The <code>yield</code> form prevents the classic connection leak: teardown runs even when the handler raises, so an exception mid-request rolls back and returns the connection to the pool instead of pinning it until timeout.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p>Dependencies with <code>yield</code> are wrapped in an <code>AsyncExitStack</code> tied to the request. Code before <code>yield</code> runs on the way in; code after runs on the way out, in reverse order. Sync dependencies are pushed to the AnyIO threadpool, exactly like sync routes.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 212" role="img" aria-label="Dependency resolution graph for a protected route">
+          <rect class="svg-box" x="8" y="84" width="104" height="44" rx="7"/>
+          <text class="svg-ttl" x="60" y="104" text-anchor="middle">request</text>
+          <text class="svg-lbl" x="60" y="118" text-anchor="middle">DELETE /items/7</text>
+
+          <rect class="svg-box" x="150" y="12" width="128" height="44" rx="7"/>
+          <text class="svg-ttl" x="214" y="32" text-anchor="middle">oauth2_scheme</text>
+          <text class="svg-lbl" x="214" y="46" text-anchor="middle">Bearer header → str</text>
+
+          <rect class="svg-box" x="150" y="156" width="128" height="44" rx="7"/>
+          <text class="svg-ttl" x="214" y="176" text-anchor="middle">get_session</text>
+          <text class="svg-lbl" x="214" y="190" text-anchor="middle">yield · commit/rollback</text>
+
+          <rect class="svg-box-a" x="314" y="84" width="130" height="44" rx="7"/>
+          <text class="svg-ttl" x="379" y="104" text-anchor="middle">get_current_user</text>
+          <text class="svg-lbl" x="379" y="118" text-anchor="middle">decode + SELECT · cached</text>
+
+          <rect class="svg-box-a" x="478" y="84" width="118" height="44" rx="7"/>
+          <text class="svg-ttl" x="537" y="104" text-anchor="middle">require_role</text>
+          <text class="svg-lbl" x="537" y="118" text-anchor="middle">("admin") → 403</text>
+
+          <rect class="svg-ok" x="628" y="84" width="64" height="44" rx="7" stroke-width="1.4"/>
+          <text class="svg-ttl" x="660" y="110" text-anchor="middle">handler</text>
+
+          <g class="svg-arrow" stroke-width="1.2" marker-end="url(#ah4)">
+            <path d="M112 100 C130 100 132 34 146 34"/>
+            <path d="M112 112 C130 112 132 178 146 178"/>
+            <path d="M278 34 C300 34 296 100 310 104"/>
+            <path d="M278 178 C300 178 296 112 310 110"/>
+            <path d="M444 106 H474"/><path d="M596 106 H624"/>
+          </g>
+          <text class="svg-lbl" x="214" y="128" text-anchor="middle">resolved once, reused by both consumers</text>
+          <defs><marker id="ah4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--fg-faint)"/></marker></defs>
+        </svg>
+        <figcaption>One graph, resolved once per request. The session's teardown fires after the handler returns — or raises.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/db/session.py — the yield lifecycle</span><button class="copy">copy</button></div>
+<pre><code>SessionFactory = async_sessionmaker(
+    engine,
+    expire_on_commit=<span class="kw">False</span>,   <span class="cmt"># attributes stay readable after commit — no lazy IO</span>
+    class_=AsyncSession,         <span class="cmt"># during response serialization</span>
+)
+
+<span class="kw">async def</span> <span class="fn">get_session</span>() -&gt; AsyncIterator[AsyncSession]:
+    <span class="kw">async with</span> SessionFactory() <span class="kw">as</span> session:
+        <span class="kw">try</span>:
+            <span class="kw">yield</span> session          <span class="cmt"># ← the route body runs here</span>
+            <span class="kw">await</span> session.commit()  <span class="cmt"># happy path: one transaction per request</span>
+        <span class="kw">except</span> Exception:
+            <span class="kw">await</span> session.rollback()  <span class="cmt"># runs even on HTTPException</span>
+            <span class="kw">raise</span></code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/dependencies.py — aliases, class deps, factories</span><button class="copy">copy</button></div>
+<pre><code>SessionDep = Annotated[AsyncSession, Depends(get_session)]
+TokenDep   = Annotated[str, Depends(oauth2_scheme)]
+
+<span class="kw">class</span> <span class="fn">Pagination</span>:
+    <span class="cmt">"""A CLASS dependency: query params validated once, reused on every list route."""</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self,
+                 limit: Annotated[int, Query(ge=<span class="ann">1</span>, le=<span class="ann">100</span>)] = <span class="ann">20</span>,
+                 offset: Annotated[int, Query(ge=<span class="ann">0</span>)] = <span class="ann">0</span>) -&gt; <span class="kw">None</span>:
+        self.limit, self.offset = limit, offset
+
+<span class="kw">async def</span> <span class="fn">get_current_user</span>(token: TokenDep, session: SessionDep) -&gt; User:
+    <span class="kw">try</span>:
+        payload = decode_token(token, expect=<span class="str">"access"</span>)
+    <span class="kw">except</span> jwt.PyJWTError <span class="kw">as</span> exc:
+        <span class="kw">raise</span> credentials_error <span class="kw">from</span> exc
+    user = <span class="kw">await</span> session.scalar(select(User).where(User.email == payload[<span class="str">"sub"</span>]))
+    <span class="kw">if</span> user <span class="kw">is None</span>: <span class="kw">raise</span> credentials_error
+    <span class="kw">return</span> user
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+<span class="kw">def</span> <span class="fn">require_role</span>(*roles: str):
+    <span class="cmt">"""A FACTORY: returns a guard closed over the allowed roles.</span>
+<span class="cmt">    It builds on CurrentUser, which FastAPI still resolves only once."""</span>
+    <span class="kw">def</span> <span class="fn">guard</span>(user: CurrentUser) -&gt; User:
+        <span class="kw">if</span> user.role <span class="kw">not in</span> roles:
+            <span class="kw">raise</span> HTTPException(<span class="ann">403</span>, f<span class="str">"requires one of roles: {roles}"</span>)
+        <span class="kw">return</span> user
+    <span class="kw">return</span> guard
+
+AdminUser = Annotated[User, Depends(require_role(<span class="str">"admin"</span>))]</code></pre>
+      </div>
+
+      <div class="note"><b>Annotated aliases are the payoff.</b> Once <code>SessionDep</code> and <code>CurrentUser</code> exist, a protected route signature reads <code>async def delete(item_id: int, session: SessionDep, user: AdminUser)</code> — fully typed, self-documenting, and the authorisation is impossible to forget because it is a parameter.</div>
+    </div>
+  </div>
+</section>
+
+<section id="m1-crud">
+  <div class="sec-head">
+    <span class="idx">M1.3</span>
+    <div>
+      <h2>Async CRUD with SQLAlchemy 2.0</h2>
+      <div class="tagline"><code>AsyncSession</code>, keyset-friendly pagination, and honest PATCH.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m1-crud" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>Create · Read+filter · PATCH · Delete</h3><div class="sub">app/services/items.py · app/routers/items.py</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>SQLAlchemy 2.0's unified API: build a <code>select()</code> statement, hand it to an <code>AsyncSession</code>, await the result. <code>aiosqlite</code> runs SQLite calls on a background thread so they look awaitable, giving you Postgres-shaped code with a zero-config file database.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>Three traps this layout avoids. <b>Lazy-load after commit</b>: with the default <code>expire_on_commit=True</code>, touching <code>item.name</code> during response serialization triggers a fresh SELECT — and in async context that raises <code>MissingGreenlet</code>. We set it to <code>False</code>.</p>
+          <p><b>Unbounded lists</b>: a <code>GET /items</code> with no <code>limit</code> is a latent outage the day the table hits a million rows. <code>Pagination</code> caps it at 100 by the type system.</p>
+          <p><b>PUT-shaped PATCH</b>: dumping the whole model on update silently nulls every field the client omitted. <code>exclude_unset=True</code> is the fix.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p>One transaction per request, owned by the <code>get_session</code> dependency. Services call <code>flush()</code> — which emits the SQL and populates the primary key without ending the transaction — and let the dependency commit. A failure anywhere rolls the whole request back atomically.</p>
+        </div>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/models/item.py — typed mappers</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">class</span> <span class="fn">Item</span>(Base):
+    __tablename__ = <span class="str">"items"</span>
+
+    id: Mapped[int] = mapped_column(primary_key=<span class="kw">True</span>)
+    name: Mapped[str] = mapped_column(String(<span class="ann">120</span>), index=<span class="kw">True</span>)
+    description: Mapped[str | <span class="kw">None</span>] = mapped_column(Text, default=<span class="kw">None</span>)
+    price_cents: Mapped[int] = mapped_column(Integer, default=<span class="ann">0</span>)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey(<span class="str">"users.id"</span>, ondelete=<span class="str">"CASCADE"</span>), index=<span class="kw">True</span>)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=<span class="kw">True</span>), server_default=func.now())   <span class="cmt"># DB clock, not app clock</span></code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/services/items.py — filtering, counting, patching</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">async def</span> <span class="fn">list_items</span>(session, *, limit, offset, owner_id=<span class="kw">None</span>, q=<span class="kw">None</span>, min_price=<span class="kw">None</span>):
+    stmt = select(Item)
+    <span class="kw">if</span> owner_id <span class="kw">is not None</span>: stmt = stmt.where(Item.owner_id == owner_id)
+    <span class="kw">if</span> q:                   stmt = stmt.where(Item.name.ilike(f<span class="str">"%{q}%"</span>))
+    <span class="kw">if</span> min_price <span class="kw">is not None</span>: stmt = stmt.where(Item.price_cents &gt;= min_price)
+
+    <span class="cmt"># total over the SAME filters, so the client can size the pager</span>
+    total = <span class="kw">await</span> session.scalar(select(func.count()).select_from(stmt.subquery()))
+    rows  = <span class="kw">await</span> session.scalars(stmt.order_by(Item.id.desc()).limit(limit).offset(offset))
+    <span class="kw">return</span> list(rows), int(total <span class="kw">or</span> <span class="ann">0</span>)
+
+<span class="kw">async def</span> <span class="fn">update_item</span>(session, item_id: int, payload: ItemUpdate) -&gt; Item:
+    item = <span class="kw">await</span> get_item(session, item_id)        <span class="cmt"># raises AppError(404)</span>
+    <span class="cmt"># exclude_unset -&gt; a body of {"price_cents": 0} touches ONLY the price</span>
+    <span class="kw">for</span> field, value <span class="kw">in</span> payload.model_dump(exclude_unset=<span class="kw">True</span>).items():
+        setattr(item, field, value)
+    <span class="kw">await</span> session.flush()                         <span class="cmt"># emit UPDATE, keep the txn open</span>
+    <span class="kw">await</span> session.refresh(item)                   <span class="cmt"># pick up onupdate=func.now()</span>
+    <span class="kw">return</span> item</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/routers/items.py — the router stays thin</span><button class="copy">copy</button></div>
+<pre><code>router = APIRouter(prefix=<span class="str">"/items"</span>, tags=[<span class="str">"items"</span>])
+
+<span class="ann">@router.post</span>(<span class="str">""</span>, response_model=ItemRead, status_code=<span class="ann">201</span>)
+<span class="kw">async def</span> <span class="fn">create</span>(payload: ItemCreate, session: SessionDep, user: CurrentUser):
+    <span class="kw">return await</span> svc.create_item(session, payload, owner_id=user.id)
+
+<span class="ann">@router.get</span>(<span class="str">""</span>, response_model=Page[ItemRead])
+<span class="kw">async def</span> <span class="fn">list_</span>(session: SessionDep, user: CurrentUser, page: PaginationDep,
+                q: str | <span class="kw">None</span> = <span class="kw">None</span>, min_price: int | <span class="kw">None</span> = <span class="kw">None</span>, mine_only: bool = <span class="kw">True</span>):
+    rows, total = <span class="kw">await</span> svc.list_items(session, limit=page.limit, offset=page.offset,
+                                         owner_id=user.id <span class="kw">if</span> mine_only <span class="kw">else None</span>,
+                                         q=q, min_price=min_price)
+    <span class="kw">return</span> Page[ItemRead](items=[ItemRead.model_validate(r) <span class="kw">for</span> r <span class="kw">in</span> rows],
+                          total=total, limit=page.limit, offset=page.offset)
+
+<span class="ann">@router.delete</span>(<span class="str">"/{item_id}"</span>, status_code=<span class="ann">204</span>)
+<span class="kw">async def</span> <span class="fn">delete</span>(item_id: int, session: SessionDep, user: AdminUser):  <span class="cmt"># RBAC by signature</span>
+    <span class="kw">await</span> svc.delete_item(session, item_id)
+    <span class="kw">return</span> Response(status_code=<span class="ann">204</span>)</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge curl">curl</span><span class="path">full CRUD round trip</span><button class="copy">copy</button></div>
+<pre><code>AUTH=<span class="str">"authorization: Bearer $TOKEN"</span>; JSON=<span class="str">"content-type: application/json"</span>
+
+curl -s -X POST localhost:8000/items -H <span class="str">"$AUTH"</span> -H <span class="str">"$JSON"</span> \
+     -d <span class="str">'{"name":"Mechanical keyboard","price_cents":12900}'</span>
+
+curl -s <span class="str">"localhost:8000/items?limit=5&amp;q=key&amp;min_price=1000"</span> -H <span class="str">"$AUTH"</span>
+
+<span class="cmt"># PATCH one field; name and description survive untouched</span>
+curl -s -X PATCH localhost:8000/items/1 -H <span class="str">"$AUTH"</span> -H <span class="str">"$JSON"</span> -d <span class="str">'{"price_cents":9900}'</span>
+
+<span class="cmt"># 204 for an admin token, 403 for a plain user</span>
+curl -s -o /dev/null -w <span class="str">"%{http_code}\n"</span> -X DELETE localhost:8000/items/1 -H <span class="str">"$AUTH"</span></code></pre>
+      </div>
+
+      <div class="note gotcha"><b>OFFSET does not scale.</b> <code>OFFSET 50000</code> makes the database walk and discard 50 000 rows on every request. It is right for admin pages and wrong for infinite scroll — there you want keyset pagination: <code>WHERE id &lt; :last_seen_id ORDER BY id DESC LIMIT 20</code>, which stays O(limit) forever.</div>
+    </div>
+  </div>
+</section>
+
+<section id="m1-auth">
+  <div class="sec-head">
+    <span class="idx">M1.4</span>
+    <div>
+      <h2>Authentication &amp; RBAC</h2>
+      <div class="tagline">Argon2 hashes, short access tokens, long refresh tokens, one role guard.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m1-auth" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>OAuth2 password bearer, end to end</h3><div class="sub">app/core/security.py · app/routers/auth.py</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>Passwords are hashed with Argon2id via <code>pwdlib</code>. A successful login returns two JWTs: a short-lived <b>access</b> token carrying <code>sub</code> and <code>role</code>, and a long-lived <b>refresh</b> token that can only mint new access tokens. <code>require_role()</code> enforces authorisation.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p><b>Argon2id over bcrypt/SHA:</b> it is memory-hard. SHA-256 is designed to be fast, so a leaked table falls to billions of GPU guesses per second. Argon2id forces each guess to allocate tens of megabytes, collapsing GPU parallelism. It also has no 72-byte truncation surprise.</p>
+          <p><b>Two token lifetimes</b> resolve a real tension: JWTs are stateless, so you cannot un-issue one. A 15-minute access token bounds the damage of theft; the refresh token lives in storage you can revoke. Skip the split and you choose between re-login every 15 minutes and a stolen token that works for a week.</p>
+          <p><b>The <code>typ</code> claim</b> closes a confusion attack: without it, a refresh token is a valid access token, undoing the whole design.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p><code>OAuth2PasswordBearer(tokenUrl="/auth/login")</code> extracts the <code>Authorization: Bearer</code> header and drives the Authorize button in <code>/docs</code>. <code>jwt.decode</code> verifies the HMAC signature and <code>exp</code>; we then assert <code>typ</code> and load the user. Login returns one identical error for unknown-email and wrong-password so response differences cannot enumerate accounts.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 254" role="img" aria-label="Login issues access and refresh tokens; the access token is verified and role-checked on each request">
+          <text class="svg-ttl" x="8" y="16">1 · register</text>
+          <rect class="svg-box" x="8" y="24" width="150" height="46" rx="7"/>
+          <text class="svg-lbl" x="83" y="43" text-anchor="middle">password →</text>
+          <text class="svg-lbl" x="83" y="58" text-anchor="middle">argon2id hash → users</text>
+
+          <text class="svg-ttl" x="196" y="16">2 · POST /auth/login</text>
+          <rect class="svg-box-a" x="196" y="24" width="168" height="46" rx="7"/>
+          <text class="svg-lbl" x="280" y="43" text-anchor="middle">form: username + password</text>
+          <text class="svg-lbl" x="280" y="58" text-anchor="middle">verify(raw, hash)</text>
+
+          <rect class="svg-ok" x="402" y="14" width="140" height="32" rx="6" stroke-width="1.3"/>
+          <text class="svg-lbl" x="472" y="34" text-anchor="middle">access · 15 min · role</text>
+          <rect class="svg-box" x="402" y="52" width="140" height="32" rx="6"/>
+          <text class="svg-lbl" x="472" y="72" text-anchor="middle">refresh · 7 days · typ</text>
+
+          <text class="svg-ttl" x="8" y="118">3 · every protected call</text>
+          <rect class="svg-box" x="8" y="126" width="132" height="44" rx="7"/>
+          <text class="svg-lbl" x="74" y="146" text-anchor="middle">Authorization:</text>
+          <text class="svg-lbl" x="74" y="160" text-anchor="middle">Bearer &lt;access&gt;</text>
+
+          <rect class="svg-box-a" x="172" y="126" width="128" height="44" rx="7"/>
+          <text class="svg-ttl" x="236" y="146" text-anchor="middle">verify signature</text>
+          <text class="svg-lbl" x="236" y="160" text-anchor="middle">exp · typ=access</text>
+
+          <rect class="svg-box-a" x="332" y="126" width="128" height="44" rx="7"/>
+          <text class="svg-ttl" x="396" y="146" text-anchor="middle">load user</text>
+          <text class="svg-lbl" x="396" y="160" text-anchor="middle">SELECT by sub</text>
+
+          <rect class="svg-box-a" x="492" y="126" width="112" height="44" rx="7"/>
+          <text class="svg-ttl" x="548" y="146" text-anchor="middle">require_role</text>
+          <text class="svg-lbl" x="548" y="160" text-anchor="middle">role in roles?</text>
+
+          <rect class="svg-ok" x="632" y="112" width="60" height="30" rx="6" stroke-width="1.3"/>
+          <text class="svg-lbl" x="662" y="131" text-anchor="middle">200</text>
+          <rect class="svg-bad" x="632" y="152" width="60" height="30" rx="6" stroke-width="1.3"/>
+          <text class="svg-lbl" x="662" y="171" text-anchor="middle">401/403</text>
+
+          <text class="svg-ttl" x="8" y="214">4 · access expired</text>
+          <rect class="svg-box" x="8" y="222" width="596" height="26" rx="6"/>
+          <text class="svg-lbl" x="306" y="239" text-anchor="middle">POST /auth/refresh  {refresh_token}  →  verify typ=refresh  →  new access (+ rotated refresh)</text>
+
+          <g class="svg-arrow" stroke-width="1.2" marker-end="url(#ah5)">
+            <path d="M158 47 H192"/><path d="M364 40 H398"/><path d="M364 58 H398"/>
+            <path d="M140 148 H168"/><path d="M300 148 H328"/><path d="M460 148 H488"/>
+            <path d="M604 140 C618 140 618 128 628 127"/><path d="M604 156 C618 156 618 166 628 167"/>
+          </g>
+          <defs><marker id="ah5" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--fg-faint)"/></marker></defs>
+        </svg>
+        <figcaption>Authentication answers "who are you" (401). Authorization answers "may you" (403). Separate dependencies, separate status codes.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/core/security.py</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">from</span> pwdlib <span class="kw">import</span> PasswordHash
+<span class="kw">import</span> jwt
+
+<span class="cmt"># Argon2id with sane params baked into the hash string (salt included).</span>
+_password_hash = PasswordHash.recommended()
+
+<span class="kw">def</span> <span class="fn">hash_password</span>(raw: str) -&gt; str:        <span class="kw">return</span> _password_hash.hash(raw)
+<span class="kw">def</span> <span class="fn">verify_password</span>(raw, hashed) -&gt; bool:  <span class="kw">return</span> _password_hash.verify(raw, hashed)
+
+<span class="kw">def</span> <span class="fn">_create_token</span>(subject, token_type, expires, extra=<span class="kw">None</span>) -&gt; str:
+    now = datetime.now(UTC)
+    payload = {
+        <span class="str">"sub"</span>: subject,
+        <span class="str">"typ"</span>: token_type,              <span class="cmt"># ← blocks refresh-as-access confusion</span>
+        <span class="str">"iat"</span>: int(now.timestamp()),
+        <span class="str">"exp"</span>: int((now + expires).timestamp()),
+        <span class="str">"jti"</span>: uuid4().hex,             <span class="cmt"># unique id → a denylist can revoke one token</span>
+        **(extra <span class="kw">or</span> {}),
+    }
+    <span class="kw">return</span> jwt.encode(payload, s.jwt_secret, algorithm=s.jwt_algorithm)
+
+<span class="kw">def</span> <span class="fn">decode_token</span>(token: str, *, expect: TokenType) -&gt; dict:
+    payload = jwt.decode(token, s.jwt_secret, algorithms=[s.jwt_algorithm])  <span class="cmt"># verifies exp too</span>
+    <span class="kw">if</span> payload.get(<span class="str">"typ"</span>) != expect:
+        <span class="kw">raise</span> jwt.InvalidTokenError(f<span class="str">"expected a {expect} token"</span>)
+    <span class="kw">return</span> payload</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/routers/auth.py — login &amp; the guarded route</span><button class="copy">copy</button></div>
+<pre><code><span class="ann">@router.post</span>(<span class="str">"/login"</span>, response_model=TokenPair)
+<span class="kw">async def</span> <span class="fn">login</span>(form: Annotated[OAuth2PasswordRequestForm, Depends()], session: SessionDep):
+    user = <span class="kw">await</span> session.scalar(select(User).where(User.email == form.username))
+    <span class="cmt"># One message for both failures: a different 404 would enumerate accounts.</span>
+    <span class="kw">if</span> user <span class="kw">is None or not</span> verify_password(form.password, user.hashed_password):
+        <span class="kw">raise</span> HTTPException(<span class="ann">401</span>, <span class="str">"Incorrect email or password"</span>,
+                            headers={<span class="str">"WWW-Authenticate"</span>: <span class="str">"Bearer"</span>})
+    <span class="kw">return</span> _issue(user)
+
+<span class="ann">@router.get</span>(<span class="str">"/admin-only"</span>, response_model=UserRead)
+<span class="kw">async def</span> <span class="fn">admin_only</span>(user: Annotated[User, Depends(require_role(<span class="str">"admin"</span>))]):
+    <span class="kw">return</span> user   <span class="cmt"># 403 for role=user, 200 for role=admin</span></code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge curl">curl</span><span class="path">prove the RBAC boundary</span><button class="copy">copy</button></div>
+<pre><code><span class="cmt"># plain user → 403</span>
+curl -s -X POST localhost:8000/auth/register -H <span class="str">"content-type: application/json"</span> \
+  -d <span class="str">'{"email":"plain@example.com","password":"Sup3rSecret!"}'</span>
+PLAIN=$(curl -s -X POST localhost:8000/auth/login \
+  -d <span class="str">"username=plain@example.com&amp;password=Sup3rSecret!"</span> | python3 -c <span class="str">'import sys,json;print(json.load(sys.stdin)["access_token"])'</span>)
+curl -s -o /dev/null -w <span class="str">"plain → %{http_code}\n"</span> localhost:8000/auth/admin-only -H <span class="str">"authorization: Bearer $PLAIN"</span>
+curl -s -o /dev/null -w <span class="str">"admin → %{http_code}\n"</span> localhost:8000/auth/admin-only -H <span class="str">"authorization: Bearer $TOKEN"</span></code></pre>
+      </div>
+
+      <div class="note danger"><b>Production checklist.</b> Keep the secret out of git (<code>openssl rand -hex 32</code> into the environment); prefer asymmetric <code>RS256</code> once more than one service verifies tokens; rotate refresh tokens on use and store their <code>jti</code> so a replayed one can be detected; put the refresh token in an <code>HttpOnly; Secure; SameSite=Strict</code> cookie for browser clients rather than localStorage.</div>
+    </div>
+  </div>
+</section>
+
+<section id="m1-concurrency">
+  <div class="sec-head">
+    <span class="idx">M1.5</span>
+    <div>
+      <h2>Async vs multi-threading vs multiprocessing</h2>
+      <div class="tagline">One event loop thread. Everything here follows from that.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m1-concurrency" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>Where your code actually runs</h3><div class="sub">app/routers/concurrency.py · app/services/heavy.py</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>Uvicorn runs <b>one asyncio event loop on one thread</b> per worker process. An <code>async def</code> route executes <i>on</i> that thread. A plain <code>def</code> route is pushed by FastAPI to AnyIO's worker threadpool (40 threads by default). CPU-bound work belongs in neither — it needs a separate process.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>This single fact explains the most common production outage in FastAPI apps: <b>one blocking call inside one <code>async def</code> freezes the entire worker</b>. Not that route — every route, including <code>/health</code>, because they all share the thread. Latency does not degrade gracefully; it cliff-edges.</p>
+          <p>And threads only fix <i>I/O</i>. CPU-bound Python holds the GIL, so moving a hash loop into a thread buys you nothing: ten concurrent requests still take ten times as long. That is what the process pool is for — and why it is not free, since arguments must be pickled across a process boundary.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p><code>await</code> on real I/O yields control back to the loop, which runs other tasks until the OS says the socket is ready. A blocking call never yields, so the loop has no opportunity to schedule anything. <code>asyncio.to_thread()</code> hands one call to a thread; <code>loop.run_in_executor(pool, …)</code> hands it to a process.</p>
+        </div>
+      </div>
+
+      <!-- ============ SIMULATOR ============ -->
+      <div class="sim">
+        <div class="sim-head">
+          <h4>Request lifecycle &amp; concurrency simulator</h4>
+          <button class="btn" id="simRun">▶ send 6 concurrent requests</button>
+          <button class="btn ghost" id="simReset">reset</button>
+        </div>
+        <div class="modes" id="simModes"></div>
+        <div class="sim-body">
+          <div class="sim-explain" id="simExplain"></div>
+          <div class="lanes" id="simLanes"></div>
+          <div class="axis"><div></div><div class="ticks" id="simTicks"></div></div>
+          <div class="verdict" id="simVerdict"></div>
+          <div class="legend">
+            <span><i style="background:var(--accent)"></i>executing</span>
+            <span><i class="mono" style="background:var(--bad)"></i>blocking the loop</span>
+            <span><i style="background:var(--ok)"></i>/health probe</span>
+            <span><i style="background:var(--line)"></i>queued / waiting</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="note"><b>Then measure the real thing.</b> The simulator models the scheduler; these two commands prove it on your own machine. Watch the wall-clock column, and keep a second terminal hitting <code>/health</code>.</div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge zsh">macOS zsh</span><span class="path">6 parallel requests per mode</span><button class="copy">copy</button></div>
+<pre><code><span class="cmt"># non-blocking: ~1.0s total for all six</span>
+seq 6 | xargs -P6 -I{} curl -s -o /dev/null -w <span class="str">"%{time_total}\n"</span> \
+  <span class="str">"localhost:8000/lab/async-good?seconds=1"</span>
+
+<span class="cmt"># blocking inside async def: ~1,2,3,4,5,6s — fully serialized</span>
+seq 6 | xargs -P6 -I{} curl -s -o /dev/null -w <span class="str">"%{time_total}\n"</span> \
+  <span class="str">"localhost:8000/lab/async-bad?seconds=1"</span>
+
+<span class="cmt"># while the above runs, in another tab — this is the lesson:</span>
+time curl -s localhost:8000/health</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/routers/concurrency.py — the four shapes</span><button class="copy">copy</button></div>
+<pre><code><span class="ann">@router.get</span>(<span class="str">"/async-good"</span>)
+<span class="kw">async def</span> <span class="fn">async_good</span>(seconds: float = <span class="ann">1.0</span>):
+    <span class="kw">await</span> asyncio.sleep(seconds)          <span class="cmt"># yields → loop serves everyone else</span>
+
+<span class="ann">@router.get</span>(<span class="str">"/async-bad"</span>)
+<span class="kw">async def</span> <span class="fn">async_bad</span>(seconds: float = <span class="ann">1.0</span>):
+    time.sleep(seconds)                   <span class="cmt"># ☠️ never yields → whole worker frozen</span>
+
+<span class="ann">@router.get</span>(<span class="str">"/sync-def"</span>)
+<span class="kw">def</span> <span class="fn">sync_def</span>(seconds: float = <span class="ann">1.0</span>):      <span class="cmt"># note: plain def</span>
+    time.sleep(seconds)                   <span class="cmt"># FastAPI → AnyIO threadpool (≈40 workers)</span>
+
+<span class="ann">@router.get</span>(<span class="str">"/to-thread"</span>)
+<span class="kw">async def</span> <span class="fn">to_thread</span>(seconds: float = <span class="ann">1.0</span>):
+    <span class="kw">await</span> asyncio.to_thread(blocking_sleep, seconds)   <span class="cmt"># offload just the bad call</span></code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">CPU-bound: thread (GIL) vs process (parallel)</span><button class="copy">copy</button></div>
+<pre><code><span class="ann">@router.get</span>(<span class="str">"/cpu-in-thread"</span>)
+<span class="kw">async def</span> <span class="fn">cpu_in_thread</span>(rounds: int = <span class="ann">400_000</span>):
+    <span class="cmt"># The loop stays responsive, but the work itself is STILL serialized by the GIL.</span>
+    digest = <span class="kw">await</span> asyncio.to_thread(pbkdf2_digest, b<span class="str">"payload"</span>, rounds)
+
+<span class="ann">@router.get</span>(<span class="str">"/cpu-in-process"</span>)
+<span class="kw">async def</span> <span class="fn">cpu_in_process</span>(request: Request, rounds: int = <span class="ann">400_000</span>):
+    pool: ProcessPoolExecutor = request.app.state.process_pool   <span class="cmt"># built in lifespan</span>
+    loop = asyncio.get_running_loop()
+    <span class="cmt"># True parallelism across cores. Cost: args+result are pickled (~tens of ms).</span>
+    digest = <span class="kw">await</span> loop.run_in_executor(pool, pbkdf2_digest, b<span class="str">"payload"</span>, rounds)</code></pre>
+      </div>
+
+      <div class="note gotcha"><b>Two pickling rules the process pool enforces.</b> The target must be a module-level function (a closure or lambda raises <code>PicklingError</code>) — which is why <code>app/services/heavy.py</code> exists. And on macOS the start method is <code>spawn</code>: each child re-imports your module, so anything expensive at import time runs again per worker.</div>
+
+      <table>
+        <thead><tr><th>Work</th><th>Right tool</th><th>Why</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td>Async DB / HTTP client</td><td><code>async def</code> + <code>await</code></td><td>Yields on I/O; thousands of connections on one thread</td><td>Needs an async driver all the way down</td></tr>
+          <tr><td>Sync-only library (<code>requests</code>, legacy driver)</td><td>plain <code>def</code> route, or <code>asyncio.to_thread</code></td><td>Blocking is confined to a worker thread</td><td>Capped at ~40 concurrent; thread memory</td></tr>
+          <tr><td>CPU-bound (hash, parse, resize)</td><td><code>ProcessPoolExecutor</code></td><td>Separate interpreters sidestep the GIL</td><td>Pickling + IPC; bounded by core count</td></tr>
+          <tr><td>Post-response side effect (audit, cache warm)</td><td><code>BackgroundTasks</code></td><td>Client gets its reply immediately</td><td>Dies with the process — not durable</td></tr>
+          <tr><td>Must survive restart / retried</td><td>Real queue (Celery, ARQ, Dramatiq)</td><td>Durable, observable, retryable</td><td>Broker to operate</td></tr>
+        </tbody>
+      </table>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">BackgroundTasks — fire and forget, with eyes open</span><button class="copy">copy</button></div>
+<pre><code><span class="ann">@router.post</span>(<span class="str">"/background"</span>)
+<span class="kw">async def</span> <span class="fn">fire_and_forget</span>(tasks: BackgroundTasks, seconds: float = <span class="ann">1.0</span>):
+    <span class="kw">def</span> <span class="fn">audit</span>() -&gt; <span class="kw">None</span>:
+        blocking_sleep(seconds)           <span class="cmt"># sync callable → runs in the threadpool</span>
+        _AUDIT.append({<span class="str">"at"</span>: time.time()})
+    tasks.add_task(audit)                 <span class="cmt"># runs AFTER the response is flushed</span>
+    <span class="kw">return</span> {<span class="str">"queued"</span>: <span class="kw">True</span>}                <span class="cmt"># …but in THIS process. A deploy kills it.</span></code></pre>
+      </div>
+
+      <div class="note"><b>Scaling out, not just up.</b> One worker uses one core. In production run <code>uvicorn app.main:app --workers 4</code> (or Gunicorn with uvicorn workers) behind a proxy, and remember each worker has its own event loop, its own pools, and its own module-level state — so in-process caches and the <code>_AUDIT</code> list above are per-worker, never shared.</div>
+    </div>
+  </div>
+</section>
+
+<section id="m1-middleware">
+  <div class="sec-head">
+    <span class="idx">M1.6</span>
+    <div>
+      <h2>Middleware, global error handling &amp; lifespan</h2>
+      <div class="tagline">The onion around every request, and the resources it borrows.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m1-middleware" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>Correlation IDs, RFC 9457, and startup pools</h3><div class="sub">app/core/middleware.py · problems.py · main.py</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>Middleware wraps every request on the way in and the response on the way out. Exception handlers convert raised exceptions into responses. <code>lifespan</code> is an <code>@asynccontextmanager</code> that runs once at startup and once at shutdown.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p><b>Correlation IDs</b> make a distributed system debuggable: one id, generated or accepted from the edge, appears in every log line and in the error body a user can read back to you. Without it you are grepping timestamps.</p>
+          <p><b>RFC 9457 Problem Details</b> gives errors one machine-readable shape — <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code> — so clients branch on a stable field instead of regexing prose. The catch-all handler is also a security control: it guarantees no stack trace or SQL ever reaches a client.</p>
+          <p><b>Lifespan</b> fixes resource lifetime. An <code>httpx.AsyncClient</code> created per request throws away connection pooling and TLS reuse and leaks sockets under load. Created once in lifespan, it is shared and closed deterministically on SIGTERM.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p>Middleware is LIFO: the last added is outermost. Ours is written as <b>pure ASGI</b> rather than <code>BaseHTTPMiddleware</code>, because the latter pipes responses through an anyio memory stream, which adds a task hop and can buffer a <code>StreamingResponse</code> — fatal for the SSE endpoints in Module 2.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 212" role="img" aria-label="Request passes through middleware, routing, dependencies and handler, with exception handlers converting errors to problem details">
+          <rect class="svg-box" x="14" y="26" width="672" height="160" rx="10"/>
+          <text class="svg-lbl" x="24" y="44">ASGI server (uvicorn · uvloop · httptools)</text>
+
+          <rect class="svg-box-a" x="34" y="54" width="632" height="118" rx="9"/>
+          <text class="svg-lbl" x="44" y="72">CorrelationTimingMiddleware — pure ASGI: id in, timing header out</text>
+
+          <rect class="svg-box" x="56" y="82" width="590" height="80" rx="8"/>
+          <text class="svg-lbl" x="66" y="99">ExceptionMiddleware → handlers: AppError · HTTPException · ValidationError · Exception</text>
+
+          <rect class="svg-box" x="78" y="108" width="140" height="44" rx="7"/>
+          <text class="svg-ttl" x="148" y="128" text-anchor="middle">router match</text>
+          <text class="svg-lbl" x="148" y="142" text-anchor="middle">path + method</text>
+
+          <rect class="svg-box" x="236" y="108" width="150" height="44" rx="7"/>
+          <text class="svg-ttl" x="311" y="128" text-anchor="middle">dependencies</text>
+          <text class="svg-lbl" x="311" y="142" text-anchor="middle">AsyncExitStack · yield</text>
+
+          <rect class="svg-box" x="404" y="108" width="110" height="44" rx="7"/>
+          <text class="svg-ttl" x="459" y="128" text-anchor="middle">handler</text>
+          <text class="svg-lbl" x="459" y="142" text-anchor="middle">your code</text>
+
+          <rect class="svg-ok" x="532" y="108" width="100" height="44" rx="7" stroke-width="1.3"/>
+          <text class="svg-ttl" x="582" y="128" text-anchor="middle">serialize</text>
+          <text class="svg-lbl" x="582" y="142" text-anchor="middle">response_model</text>
+
+          <g class="svg-arrow" stroke-width="1.2" marker-end="url(#ah6)">
+            <path d="M218 130 H232"/><path d="M386 130 H400"/><path d="M514 130 H528"/>
+          </g>
+          <text class="svg-lbl" x="24" y="202">lifespan (once per process): create engine · httpx client · process pool → app.state → close on shutdown</text>
+          <defs><marker id="ah6" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--fg-faint)"/></marker></defs>
+        </svg>
+        <figcaption>Outer layers see every request including 404s; dependencies and handlers see only matched routes.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/core/middleware.py — pure ASGI</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">class</span> <span class="fn">CorrelationTimingMiddleware</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, app): self.app = app
+
+    <span class="kw">async def</span> <span class="fn">__call__</span>(self, scope, receive, send):
+        <span class="kw">if</span> scope[<span class="str">"type"</span>] != <span class="str">"http"</span>:                  <span class="cmt"># let lifespan/websocket pass through</span>
+            <span class="kw">return await</span> self.app(scope, receive, send)
+
+        incoming = dict(scope[<span class="str">"headers"</span>]).get(b<span class="str">"x-correlation-id"</span>)
+        cid = incoming.decode() <span class="kw">if</span> incoming <span class="kw">else</span> uuid.uuid4().hex   <span class="cmt"># trust the edge, else mint</span>
+        scope.setdefault(<span class="str">"state"</span>, {})[<span class="str">"correlation_id"</span>] = cid
+        started = time.perf_counter()
+
+        <span class="kw">async def</span> <span class="fn">send_wrapper</span>(message):
+            <span class="kw">if</span> message[<span class="str">"type"</span>] == <span class="str">"http.response.start"</span>:   <span class="cmt"># headers only — body untouched,</span>
+                ms = (time.perf_counter() - started) * <span class="ann">1000</span>  <span class="cmt"># so streaming still streams</span>
+                message[<span class="str">"headers"</span>].append((b<span class="str">"x-correlation-id"</span>, cid.encode()))
+                message[<span class="str">"headers"</span>].append((b<span class="str">"x-process-time-ms"</span>, f<span class="str">"{ms:.2f}"</span>.encode()))
+            <span class="kw">await</span> send(message)
+
+        <span class="kw">await</span> self.app(scope, receive, send_wrapper)</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/core/problems.py — one error shape</span><button class="copy">copy</button></div>
+<pre><code>CONTENT_TYPE = <span class="str">"application/problem+json"</span>
+
+<span class="kw">def</span> <span class="fn">problem</span>(request, *, status_code, title, detail, type_=<span class="str">"about:blank"</span>, **extra):
+    <span class="kw">return</span> JSONResponse({
+        <span class="str">"type"</span>: type_,                                   <span class="cmt"># stable, documentable URI</span>
+        <span class="str">"title"</span>: title, <span class="str">"status"</span>: status_code, <span class="str">"detail"</span>: detail,
+        <span class="str">"instance"</span>: str(request.url.path),
+        <span class="str">"correlation_id"</span>: request.scope[<span class="str">"state"</span>][<span class="str">"correlation_id"</span>],  <span class="cmt"># ties body ↔ logs</span>
+        **extra,
+    }, status_code=status_code, media_type=CONTENT_TYPE)
+
+<span class="ann">@app.exception_handler</span>(RequestValidationError)
+<span class="kw">async def</span> <span class="fn">_validation_error</span>(request, exc):
+    <span class="kw">return</span> problem(request, status_code=<span class="ann">422</span>, title=<span class="str">"Request validation failed"</span>,
+                   detail=<span class="str">"One or more fields are invalid."</span>,
+                   errors=[{<span class="str">"loc"</span>: e[<span class="str">"loc"</span>], <span class="str">"msg"</span>: e[<span class="str">"msg"</span>]} <span class="kw">for</span> e <span class="kw">in</span> exc.errors()])
+
+<span class="ann">@app.exception_handler</span>(Exception)
+<span class="kw">async def</span> <span class="fn">_unhandled</span>(request, exc):
+    <span class="cmt"># Log the traceback server-side; the client gets nothing exploitable.</span>
+    <span class="kw">return</span> problem(request, status_code=<span class="ann">500</span>, title=<span class="str">"Internal Server Error"</span>,
+                   detail=<span class="str">"An unexpected error occurred."</span>)</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/main.py — lifespan owns every shared resource</span><button class="copy">copy</button></div>
+<pre><code><span class="ann">@asynccontextmanager</span>
+<span class="kw">async def</span> <span class="fn">lifespan</span>(app: FastAPI) -&gt; AsyncIterator[<span class="kw">None</span>]:
+    <span class="kw">await</span> init_models()                                   <span class="cmt"># dev only; use Alembic in prod</span>
+    app.state.http = httpx.AsyncClient(timeout=<span class="ann">10.0</span>)      <span class="cmt"># pooled, keep-alive, reused</span>
+    app.state.process_pool = ProcessPoolExecutor(max_workers=<span class="ann">2</span>)
+    app.state.ready = <span class="kw">True</span>
+    <span class="kw">try</span>:
+        <span class="kw">yield</span>                                             <span class="cmt"># ← the app serves traffic here</span>
+    <span class="kw">finally</span>:                                              <span class="cmt"># runs on SIGTERM: graceful drain</span>
+        app.state.ready = <span class="kw">False</span>                           <span class="cmt"># flip readiness before tearing down</span>
+        <span class="kw">await</span> app.state.http.aclose()
+        app.state.process_pool.shutdown(cancel_futures=<span class="kw">True</span>)
+        <span class="kw">await</span> engine.dispose()
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app.add_middleware(CorrelationTimingMiddleware)   <span class="cmt"># LIFO: added last = outermost</span>
+register_exception_handlers(app)</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge curl">curl</span><span class="path">see the headers and the problem body</span><button class="copy">copy</button></div>
+<pre><code>curl -si localhost:8000/health | grep -iE <span class="str">"x-correlation-id|x-process-time"</span>
+
+<span class="cmt"># send your own id — it is echoed back and lands in the error body</span>
+curl -s localhost:8000/items/999999 -H <span class="str">"authorization: Bearer $TOKEN"</span> \
+     -H <span class="str">"x-correlation-id: trace-abc-123"</span> | python3 -m json.tool</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= MODULE 2 ===== -->
+
+<section id="m2-stream">
+  <div class="sec-head">
+    <span class="idx">M2.1</span>
+    <div>
+      <h2>Streaming LLM tokens with SSE</h2>
+      <div class="tagline">Trade total latency for time-to-first-token.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m2-stream" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3><code>StreamingResponse</code> over <code>text/event-stream</code></h3><div class="sub">app/routers/ai.py · app/services/llm.py</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>Server-Sent Events is a one-way text protocol over plain HTTP: the response never ends, and each frame is <code>event: name</code> + <code>data: payload</code> + a <b>blank line</b>. FastAPI streams it by consuming an async generator through <code>StreamingResponse</code>.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>A 400-token answer takes ~8 seconds to generate. Buffered, the user stares at a spinner for 8 seconds; streamed, text appears in ~300 ms. Same total time, completely different product — and it also removes gateway idle-timeout failures on long generations.</p>
+          <p><b>Why SSE and not WebSockets:</b> you only need server→client. SSE is ordinary HTTP, so your existing auth headers, proxies, load balancers and logging all work unchanged, and browsers reconnect automatically. WebSockets buy bidirectionality you are not using, at the cost of a different protocol to operate.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p>Three things must all hold or it silently buffers: <b>(1)</b> an async <i>generator</i> that yields per token — never build the string first; <b>(2)</b> <code>media_type="text/event-stream"</code>; <b>(3)</b> <code>X-Accel-Buffering: no</code> so nginx does not re-buffer. Add a <code>request.is_disconnected()</code> check to stop paying for tokens when the user closes the tab.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 170" role="img" aria-label="Buffered response versus streamed SSE frames over time">
+          <text class="svg-ttl" x="8" y="18">Buffered — one JSON body at the end</text>
+          <rect class="svg-box" x="8" y="26" width="684" height="30" rx="6"/>
+          <rect class="svg-bad" x="10" y="28" width="560" height="26" rx="5" stroke-width="1"/>
+          <text class="svg-lbl" x="290" y="45" text-anchor="middle">client waits · nothing on screen · 8.0 s</text>
+          <rect class="svg-ok" x="574" y="28" width="116" height="26" rx="5" stroke-width="1"/>
+          <text class="svg-lbl" x="632" y="45" text-anchor="middle">full answer</text>
+
+          <text class="svg-ttl" x="8" y="86">Streamed — SSE frame per token</text>
+          <rect class="svg-box" x="8" y="94" width="684" height="30" rx="6"/>
+          <g>
+            <rect class="svg-ok" x="12" y="96" width="24" height="26" rx="4" stroke-width="1"/>
+            <text class="svg-lbl" x="24" y="113" text-anchor="middle">start</text>
+          </g>
+          <g fill="var(--accent)" opacity=".85">
+            <rect x="40" y="96" width="18" height="26" rx="4"/><rect x="62" y="96" width="18" height="26" rx="4"/>
+            <rect x="84" y="96" width="18" height="26" rx="4"/><rect x="106" y="96" width="18" height="26" rx="4"/>
+            <rect x="128" y="96" width="18" height="26" rx="4"/><rect x="150" y="96" width="18" height="26" rx="4"/>
+            <rect x="172" y="96" width="18" height="26" rx="4"/><rect x="194" y="96" width="18" height="26" rx="4"/>
+            <rect x="216" y="96" width="18" height="26" rx="4"/><rect x="238" y="96" width="18" height="26" rx="4"/>
+            <rect x="260" y="96" width="18" height="26" rx="4"/><rect x="282" y="96" width="18" height="26" rx="4"/>
+            <rect x="304" y="96" width="18" height="26" rx="4"/><rect x="326" y="96" width="18" height="26" rx="4"/>
+            <rect x="348" y="96" width="18" height="26" rx="4"/><rect x="370" y="96" width="18" height="26" rx="4"/>
+            <rect x="392" y="96" width="18" height="26" rx="4"/><rect x="414" y="96" width="18" height="26" rx="4"/>
+            <rect x="436" y="96" width="18" height="26" rx="4"/><rect x="458" y="96" width="18" height="26" rx="4"/>
+            <rect x="480" y="96" width="18" height="26" rx="4"/><rect x="502" y="96" width="18" height="26" rx="4"/>
+            <rect x="524" y="96" width="18" height="26" rx="4"/><rect x="546" y="96" width="18" height="26" rx="4"/>
+            <rect x="568" y="96" width="18" height="26" rx="4"/><rect x="590" y="96" width="18" height="26" rx="4"/>
+            <rect x="612" y="96" width="18" height="26" rx="4"/><rect x="634" y="96" width="18" height="26" rx="4"/>
+          </g>
+          <rect class="svg-ok" x="658" y="96" width="30" height="26" rx="4" stroke-width="1"/>
+          <text class="svg-lbl" x="673" y="113" text-anchor="middle">done</text>
+          <path d="M24 130 V140" class="svg-arrow" stroke="var(--ok)" stroke-width="1.2"/>
+          <text class="svg-lbl" x="24" y="152" text-anchor="middle" fill="var(--ok)">TTFT ≈ 0.3 s</text>
+          <text class="svg-lbl" x="640" y="152" text-anchor="end">same 8.0 s total — but the user is reading throughout</text>
+        </svg>
+        <figcaption>Perceived latency is time-to-first-token, not total time. Streaming optimises the number the user feels.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/routers/ai.py — the SSE endpoint</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">def</span> <span class="fn">sse</span>(event: str, data: dict | str) -&gt; str:
+    payload = data <span class="kw">if</span> isinstance(data, str) <span class="kw">else</span> json.dumps(data)
+    <span class="cmt"># The trailing BLANK LINE terminates the frame. Omit it and EventSource</span>
+    <span class="cmt"># buffers forever — the #1 reason "streaming doesn't work".</span>
+    <span class="kw">return</span> f<span class="str">"event: {event}\ndata: {payload}\n\n"</span>
+
+<span class="ann">@router.post</span>(<span class="str">"/ai/stream"</span>)
+<span class="kw">async def</span> <span class="fn">stream_chat</span>(payload: ChatRequest, request: Request) -&gt; StreamingResponse:
+    <span class="kw">async def</span> <span class="fn">gen</span>() -&gt; AsyncIterator[str]:
+        <span class="kw">yield</span> sse(<span class="str">"start"</span>, {<span class="str">"model"</span>: get_settings().chat_model})
+        <span class="kw">try</span>:
+            <span class="kw">async for</span> token <span class="kw">in</span> astream_tokens(payload.prompt):
+                <span class="kw">if await</span> request.is_disconnected():
+                    <span class="kw">break</span>                      <span class="cmt"># tab closed → stop burning tokens</span>
+                <span class="kw">yield</span> sse(<span class="str">"token"</span>, {<span class="str">"t"</span>: token})
+            <span class="kw">yield</span> sse(<span class="str">"done"</span>, {<span class="str">"ok"</span>: <span class="kw">True</span>})
+        <span class="kw">except</span> Exception <span class="kw">as</span> exc:
+            <span class="cmt"># Headers already sent: you CANNOT change the status code now.</span>
+            <span class="kw">yield</span> sse(<span class="str">"error"</span>, {<span class="str">"message"</span>: str(exc)})
+
+    <span class="kw">return</span> StreamingResponse(gen(), media_type=<span class="str">"text/event-stream"</span>,
+        headers={<span class="str">"Cache-Control"</span>: <span class="str">"no-cache"</span>,
+                 <span class="str">"Connection"</span>: <span class="str">"keep-alive"</span>,
+                 <span class="str">"X-Accel-Buffering"</span>: <span class="str">"no"</span>})   <span class="cmt"># tell nginx not to re-buffer</span></code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/services/llm.py — yield, never accumulate</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">async def</span> <span class="fn">astream_tokens</span>(prompt: str) -&gt; AsyncIterator[str]:
+    model = get_chat_model()              <span class="cmt"># None when no API key → mock mode</span>
+    <span class="kw">if</span> model <span class="kw">is None</span>:
+        <span class="kw">for</span> token <span class="kw">in</span> _mock_tokens(prompt):
+            <span class="kw">await</span> asyncio.sleep(<span class="ann">0.04</span>)      <span class="cmt"># simulate inter-token latency</span>
+            <span class="kw">yield</span> token
+        <span class="kw">return</span>
+
+    <span class="kw">async for</span> chunk <span class="kw">in</span> model.astream(prompt):   <span class="cmt"># LangChain async streaming</span>
+        <span class="kw">if</span> text := (getattr(chunk, <span class="str">"content"</span>, <span class="str">""</span>) <span class="kw">or</span> <span class="str">""</span>):
+            <span class="kw">yield</span> text</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge curl">curl</span><span class="path">watch frames arrive one by one</span><button class="copy">copy</button></div>
+<pre><code><span class="cmt"># -N disables curl's own buffering. Works with no API key (mock mode).</span>
+curl -N -X POST localhost:8000/ai/stream \
+  -H <span class="str">"content-type: application/json"</span> \
+  -d <span class="str">'{"prompt":"Explain backpressure in two sentences."}'</span></code></pre>
+      </div>
+
+      <div class="note gotcha"><b>The status code is decided before the first byte.</b> Once headers are flushed you cannot turn a 200 into a 500 — so validate everything you can <i>before</i> returning <code>StreamingResponse</code>, and report mid-stream failures as an <code>error</code> event your client knows how to render.</div>
+    </div>
+  </div>
+</section>
+
+<section id="m2-rag">
+  <div class="sec-head">
+    <span class="idx">M2.2</span>
+    <div>
+      <h2>Retrieval-Augmented Generation</h2>
+      <div class="tagline">Chunk, embed, retrieve, ground, cite.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m2-rag" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>Ingestion and query, with the trade-offs made explicit</h3><div class="sub">app/services/rag.py · POST /rag/ingest · POST /rag/query</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>Two pipelines. <b>Ingest</b>: extract text → split into overlapping chunks → embed each chunk into a vector → persist in ChromaDB under <code>./chroma_data</code>. <b>Query</b>: embed the question, find the nearest chunks by cosine similarity, paste them into a grounded prompt, and return the answer with citations.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p>RAG attacks two LLM failure modes at once: it supplies knowledge the model never trained on (your documents), and it makes answers <b>auditable</b> — a citation is a claim the reader can check. The prompt's instruction to reply "Not in the provided sources" is what converts a confident hallucination into an honest miss.</p>
+          <p><b>Chunk size is the central trade-off.</b> Too large and the embedding averages several topics into a vague centroid that matches everything weakly; you also burn context on irrelevant text. Too small and each chunk loses the context that made it meaningful — a chunk saying "it must be rotated every 90 days" is useless if "the signing key" sat in the previous chunk. ~800 characters with ~120 of overlap is a sane default: the overlap is insurance against a cut landing mid-argument.</p>
+          <p><b>Cosine similarity</b> compares direction, not magnitude, so a long document chunk and a short question are comparable. It is also only lexical-semantic closeness — not relevance. A chunk that mentions all your keywords while answering a different question still scores highly, which is why production systems add reranking and a score floor.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p><code>RecursiveCharacterTextSplitter</code> tries separators in order — paragraph, line, sentence, word — so splits land on natural boundaries rather than mid-word. Chroma persists vectors plus metadata to disk; the metadata (<code>source</code>, <code>chunk</code>) is what makes citations possible. PDF parsing and splitting are CPU-bound, so both run through <code>asyncio.to_thread</code>.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 272" role="img" aria-label="RAG ingestion and query pipelines sharing a vector store">
+          <text class="svg-ttl" x="8" y="16">Ingestion — POST /rag/ingest</text>
+          <rect class="svg-box" x="8" y="26" width="104" height="46" rx="7"/>
+          <text class="svg-lbl" x="60" y="45" text-anchor="middle">upload</text>
+          <text class="svg-lbl" x="60" y="60" text-anchor="middle">.pdf / .md</text>
+
+          <rect class="svg-box" x="136" y="26" width="112" height="46" rx="7"/>
+          <text class="svg-lbl" x="192" y="45" text-anchor="middle">extract text</text>
+          <text class="svg-lbl" x="192" y="60" text-anchor="middle">pypdf · to_thread</text>
+
+          <rect class="svg-box-a" x="272" y="26" width="140" height="46" rx="7"/>
+          <text class="svg-lbl" x="342" y="45" text-anchor="middle">split: 800 chars</text>
+          <text class="svg-lbl" x="342" y="60" text-anchor="middle">overlap 120</text>
+
+          <rect class="svg-box" x="436" y="26" width="118" height="46" rx="7"/>
+          <text class="svg-lbl" x="495" y="45" text-anchor="middle">embed</text>
+          <text class="svg-lbl" x="495" y="60" text-anchor="middle">1536-dim vector</text>
+
+          <rect class="svg-box-a" x="578" y="88" width="114" height="76" rx="8"/>
+          <text class="svg-ttl" x="635" y="112" text-anchor="middle">ChromaDB</text>
+          <text class="svg-lbl" x="635" y="128" text-anchor="middle">./chroma_data</text>
+          <text class="svg-lbl" x="635" y="143" text-anchor="middle">vectors + metadata</text>
+          <text class="svg-lbl" x="635" y="157" text-anchor="middle">(source, chunk)</text>
+
+          <text class="svg-ttl" x="8" y="188">Query — POST /rag/query</text>
+          <rect class="svg-box" x="8" y="198" width="104" height="46" rx="7"/>
+          <text class="svg-lbl" x="60" y="217" text-anchor="middle">question</text>
+
+          <rect class="svg-box" x="136" y="198" width="112" height="46" rx="7"/>
+          <text class="svg-lbl" x="192" y="217" text-anchor="middle">embed query</text>
+          <text class="svg-lbl" x="192" y="232" text-anchor="middle">same model!</text>
+
+          <rect class="svg-box-a" x="272" y="198" width="140" height="46" rx="7"/>
+          <text class="svg-lbl" x="342" y="217" text-anchor="middle">top-k cosine</text>
+          <text class="svg-lbl" x="342" y="232" text-anchor="middle">k = 4</text>
+
+          <rect class="svg-box-a" x="436" y="198" width="118" height="46" rx="7"/>
+          <text class="svg-lbl" x="495" y="217" text-anchor="middle">grounded prompt</text>
+          <text class="svg-lbl" x="495" y="232" text-anchor="middle">context + rules</text>
+
+          <rect class="svg-ok" x="578" y="198" width="114" height="46" rx="7" stroke-width="1.3"/>
+          <text class="svg-lbl" x="635" y="217" text-anchor="middle">answer +</text>
+          <text class="svg-lbl" x="635" y="232" text-anchor="middle">[source#chunk]</text>
+
+          <g class="svg-arrow" stroke-width="1.2" marker-end="url(#ah7)">
+            <path d="M112 49 H132"/><path d="M248 49 H268"/><path d="M412 49 H432"/>
+            <path d="M554 49 C590 49 600 70 628 84"/>
+            <path d="M112 221 H132"/><path d="M248 221 H268"/><path d="M412 221 H432"/><path d="M554 221 H574"/>
+            <path d="M600 164 C560 180 420 186 350 194"/>
+          </g>
+          <text class="svg-lbl" x="470" y="178">retrieved chunks →</text>
+          <defs><marker id="ah7" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--fg-faint)"/></marker></defs>
+        </svg>
+        <figcaption>Ingest and query must use the <b>same embedding model</b> — vectors from different models are not comparable, and the symptom is silently bad retrieval, not an error.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/services/rag.py — chunking with overlap</span><button class="copy">copy</button></div>
+<pre><code>CHUNK_SIZE, CHUNK_OVERLAP = <span class="ann">800</span>, <span class="ann">120</span>
+
+<span class="kw">def</span> <span class="fn">split_text</span>(text: str, size=CHUNK_SIZE, overlap=CHUNK_OVERLAP) -&gt; list[str]:
+    <span class="kw">from</span> langchain_text_splitters <span class="kw">import</span> RecursiveCharacterTextSplitter
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=size,
+        chunk_overlap=overlap,
+        <span class="cmt"># Tried in order: paragraph → line → sentence → word → character.</span>
+        <span class="cmt"># Splits land on structure, so a chunk is rarely cut mid-thought.</span>
+        separators=[<span class="str">"\n\n"</span>, <span class="str">"\n"</span>, <span class="str">". "</span>, <span class="str">" "</span>, <span class="str">""</span>],
+    )
+    <span class="kw">return</span> [c <span class="kw">for</span> c <span class="kw">in</span> splitter.split_text(text) <span class="kw">if</span> c.strip()]
+
+<span class="kw">async def</span> <span class="fn">ingest</span>(filename: str, raw: bytes) -&gt; dict:
+    text   = <span class="kw">await</span> asyncio.to_thread(extract_text, filename, raw)  <span class="cmt"># CPU-bound → thread</span>
+    chunks = <span class="kw">await</span> asyncio.to_thread(split_text, text)
+    metas  = [{<span class="str">"source"</span>: filename, <span class="str">"chunk"</span>: i} <span class="kw">for</span> i <span class="kw">in</span> range(len(chunks))]
+    <span class="kw">await</span> asyncio.to_thread(store.add_texts, chunks, metas)       <span class="cmt"># embeds + persists</span>
+    <span class="kw">return</span> {<span class="str">"chunks"</span>: len(chunks), <span class="str">"chunk_overlap"</span>: CHUNK_OVERLAP}</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">grounding the prompt + returning citations</span><button class="copy">copy</button></div>
+<pre><code>GROUNDED_PROMPT = <span class="str">"""You answer strictly from the CONTEXT below.</span>
+<span class="str">If the context does not contain the answer, reply exactly: "Not in the provided sources."</span>
+<span class="str">Cite sources inline as [source#chunk].</span>
+
+<span class="str">CONTEXT:</span>
+<span class="str">{context}</span>
+
+<span class="str">QUESTION: {question}</span>
+<span class="str">ANSWER:"""</span>
+
+<span class="kw">async def</span> <span class="fn">query</span>(question: str, k: int = <span class="ann">4</span>) -&gt; dict:
+    hits = <span class="kw">await</span> retrieve(question, k)
+    <span class="kw">if not</span> hits:
+        <span class="kw">return</span> {<span class="str">"answer"</span>: <span class="str">"Nothing ingested yet."</span>, <span class="str">"citations"</span>: []}
+    answer = <span class="kw">await</span> acomplete(build_prompt(question, hits))
+    <span class="kw">return</span> {<span class="str">"answer"</span>: answer,
+            <span class="cmt"># Citations are the audit trail: every claim is traceable to a chunk.</span>
+            <span class="str">"citations"</span>: [{<span class="str">"source"</span>: h[<span class="str">"source"</span>], <span class="str">"chunk"</span>: h[<span class="str">"chunk"</span>],
+                           <span class="str">"score"</span>: h[<span class="str">"score"</span>]} <span class="kw">for</span> h <span class="kw">in</span> hits]}</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge curl">curl</span><span class="path">ingest → inspect retrieval → ask</span><button class="copy">copy</button></div>
+<pre><code><span class="cmt"># 1. ingest this project's own README</span>
+curl -s -X POST localhost:8000/rag/ingest -F <span class="str">"file=@README.md"</span> | python3 -m json.tool
+
+<span class="cmt"># 2. retrieval ONLY — see exactly what the LLM would be handed, and the scores</span>
+curl -s <span class="str">"localhost:8000/rag/retrieve?q=how%20do%20I%20run%20the%20app&amp;k=3"</span> | python3 -m json.tool
+
+<span class="cmt"># 3. the grounded answer with citations</span>
+curl -s -X POST localhost:8000/rag/query -H <span class="str">"content-type: application/json"</span> \
+  -d <span class="str">'{"question":"How do I start the dev server?","k":4}'</span> | python3 -m json.tool</code></pre>
+      </div>
+
+      <div class="note"><b>Runs with no API key.</b> Without <code>OPENAI_API_KEY</code> the service swaps in a hashed bag-of-words store with the same cosine maths, so ingestion, scores, citations and the endpoint shapes are all inspectable offline. <code>backend</code> in every response tells you which one answered. Set the key and the same code path uses Chroma + real embeddings — the difference is semantic recall, not plumbing.</div>
+
+      <div class="note gotcha"><b>Debug retrieval before you debug the prompt.</b> When a RAG answer is wrong, <code>GET /rag/retrieve</code> first. If the right chunk is not in the top-k, no prompt engineering will save you — the fix is chunking, the embedding model, or a reranker. Fixing the prompt when retrieval is broken is the most common wasted day in AI engineering.</div>
+    </div>
+  </div>
+</section>
+
+<section id="m2-agent">
+  <div class="sec-head">
+    <span class="idx">M2.3</span>
+    <div>
+      <h2>Agentic workflow with LangGraph</h2>
+      <div class="tagline">A state machine with cycles — not a chain.</div>
+    </div>
+    <label class="lesson-check"><input type="checkbox" data-lesson="m2-agent" /> done</label>
+  </div>
+
+  <div class="card">
+    <header><h3>Router → Tool → Synthesizer, with an execution trace</h3><div class="sub">app/services/agent_graph.py · POST /agent/chat</div></header>
+    <div class="card-body">
+      <div class="wwh">
+        <div class="block what"><span class="lbl">What it is</span>
+          <p>A <code>StateGraph</code> over a <code>TypedDict</code>. Nodes are plain async functions that take the state and return a <i>partial</i> update; edges decide what runs next. A <b>conditional edge</b> reads the state and picks the next node, so the router's decision — tool or straight to synthesis — is data, not control flow buried in an <code>if</code>.</p>
+        </div>
+        <div class="block why"><span class="lbl">Why it matters</span>
+          <p><b>Why a cyclic graph beats a linear chain.</b> A chain is a fixed pipeline: A → B → C, decided before it runs. Real tool use needs a loop: call a tool, look at the result, decide whether it was enough, maybe call another, then answer. In a chain you emulate that with nested conditionals and recursion, and you lose the thread. In a graph, "tool results flow back into the planner" is one edge, and a step budget is a built-in guard rather than a hand-rolled recursion limit.</p>
+          <p><b>Why explicit state beats hidden memory.</b> Every transition is a visible merge into one dict, so you can log it, replay it, checkpoint it, and resume mid-run after a crash. The <code>trace</code> channel this graph returns — which nodes ran, which tool, why, how many milliseconds — is the difference between an agent you can debug and a black box you restart.</p>
+        </div>
+        <div class="block how"><span class="lbl">How it works</span>
+          <p>Each channel of the state gets a reducer. A scalar like <code>answer</code> is overwritten; <code>trace</code> is annotated with an append reducer, so every node contributes without clobbering the others — the same mechanism that accumulates message history in chat agents. <code>add_conditional_edges("router", route_decision, {...})</code> maps the function's return value to the next node. <code>compile()</code> validates the graph once at import; <code>ainvoke()</code> runs it.</p>
+        </div>
+      </div>
+
+      <figure>
+        <svg viewBox="0 0 700 252" role="img" aria-label="StateGraph with a router node, a conditional edge to a tool node or straight to synthesis, and the state channels it merges">
+          <circle cx="40" cy="92" r="15" class="svg-box"/>
+          <text class="svg-lbl" x="40" y="96" text-anchor="middle">START</text>
+
+          <rect class="svg-box-a" x="92" y="64" width="132" height="56" rx="8"/>
+          <text class="svg-ttl" x="158" y="86" text-anchor="middle">router / planner</text>
+          <text class="svg-lbl" x="158" y="101" text-anchor="middle">sets route + reason</text>
+          <text class="svg-lbl" x="158" y="114" text-anchor="middle">picks the tool</text>
+
+          <path d="M224 92 H272" class="svg-arrow" stroke-width="1.2" marker-end="url(#ah8)"/>
+          <polygon points="272,92 300,74 328,92 300,110" class="svg-box" stroke-dasharray="3 2"/>
+          <text class="svg-lbl" x="300" y="95" text-anchor="middle">route?</text>
+
+          <rect class="svg-box-a" x="380" y="18" width="150" height="62" rx="8"/>
+          <text class="svg-ttl" x="455" y="40" text-anchor="middle">tool node</text>
+          <text class="svg-lbl" x="455" y="55" text-anchor="middle">vector_search (RAG)</text>
+          <text class="svg-lbl" x="455" y="69" text-anchor="middle">service_status (live)</text>
+
+          <rect class="svg-ok" x="380" y="118" width="150" height="56" rx="8" stroke-width="1.3"/>
+          <text class="svg-ttl" x="455" y="140" text-anchor="middle">synthesizer</text>
+          <text class="svg-lbl" x="455" y="155" text-anchor="middle">grounded if evidence</text>
+
+          <circle cx="620" cy="146" r="15" class="svg-box"/>
+          <text class="svg-lbl" x="620" y="150" text-anchor="middle">END</text>
+
+          <g class="svg-arrow" stroke-width="1.3" marker-end="url(#ah8)">
+            <path d="M55 92 H88"/>
+            <path d="M328 82 C352 74 356 50 376 49" stroke="var(--accent)"/>
+            <path d="M328 102 C352 118 356 142 376 146"/>
+            <path d="M455 80 V114" stroke="var(--accent)"/>
+            <path d="M530 146 H602"/>
+          </g>
+          <text class="svg-lbl" x="344" y="40" fill="var(--accent)">"tool"</text>
+          <text class="svg-lbl" x="336" y="134">"direct"</text>
+          <text class="svg-lbl" x="470" y="100" fill="var(--accent)">results merge into state</text>
+
+          <path d="M455 18 C455 2 158 2 158 60" class="svg-arrow" stroke-width="1.1" stroke-dasharray="4 3"/>
+          <text class="svg-lbl" x="306" y="12" text-anchor="middle">optional cycle: re-plan after a tool call (chains cannot do this)</text>
+
+          <rect class="svg-box" x="92" y="198" width="528" height="44" rx="8"/>
+          <text class="svg-lbl" x="104" y="216">AgentState: question · route · reason · tool_name · tool_output · answer</text>
+          <text class="svg-lbl" x="104" y="232">trace: Annotated[list, _append]  ← append reducer; every node contributes, none clobbers</text>
+          <defs><marker id="ah8" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--fg-faint)"/></marker></defs>
+        </svg>
+        <figcaption>The dashed edge is what a chain cannot express: results re-entering the planner, bounded by a step budget.</figcaption>
+      </figure>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">app/services/agent_graph.py — state &amp; reducers</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">def</span> <span class="fn">_append</span>(left: list, right: list) -&gt; list:
+    <span class="kw">return</span> (left <span class="kw">or</span> []) + (right <span class="kw">or</span> [])
+
+<span class="kw">class</span> <span class="fn">AgentState</span>(TypedDict, total=<span class="kw">False</span>):
+    question: str
+    route: Literal[<span class="str">"tool"</span>, <span class="str">"direct"</span>]     <span class="cmt"># scalars: last write wins</span>
+    reason: str
+    tool_name: str | <span class="kw">None</span>
+    tool_output: list[dict]
+    answer: str
+    trace: Annotated[list[dict], _append]  <span class="cmt"># ← reducer: nodes APPEND, never overwrite</span></code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">nodes return partial state — that is the whole contract</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">async def</span> <span class="fn">router_node</span>(state: AgentState) -&gt; AgentState:
+    <span class="cmt">"""Deterministic heuristic here so the decision is inspectable. Swap in a</span>
+<span class="cmt">    structured-output LLM call and nothing downstream changes."""</span>
+    q = state[<span class="str">"question"</span>].lower()
+    <span class="kw">if</span> any(h <span class="kw">in</span> q <span class="kw">for</span> h <span class="kw">in</span> STATUS_HINTS):
+        route, tool, why = <span class="str">"tool"</span>, <span class="str">"service_status"</span>, <span class="str">"asks about live service state"</span>
+    <span class="kw">elif</span> any(h <span class="kw">in</span> q <span class="kw">for</span> h <span class="kw">in</span> RETRIEVAL_HINTS) <span class="kw">or</span> len(q.split()) &gt; <span class="ann">6</span>:
+        route, tool, why = <span class="str">"tool"</span>, <span class="str">"vector_search"</span>, <span class="str">"likely needs grounded evidence"</span>
+    <span class="kw">else</span>:
+        route, tool, why = <span class="str">"direct"</span>, <span class="kw">None</span>, <span class="str">"short conversational turn"</span>
+    <span class="kw">return</span> {<span class="str">"route"</span>: route, <span class="str">"tool_name"</span>: tool, <span class="str">"reason"</span>: why,
+            <span class="str">"trace"</span>: [{<span class="str">"node"</span>: <span class="str">"router"</span>, <span class="str">"decision"</span>: route, <span class="str">"tool"</span>: tool, <span class="str">"why"</span>: why}]}
+
+<span class="kw">async def</span> <span class="fn">tool_node</span>(state: AgentState) -&gt; AgentState:
+    name = state.get(<span class="str">"tool_name"</span>) <span class="kw">or</span> <span class="str">"vector_search"</span>
+    output = <span class="kw">await</span> TOOLS[name](state[<span class="str">"question"</span>])
+    <span class="kw">return</span> {<span class="str">"tool_output"</span>: output,
+            <span class="str">"trace"</span>: [{<span class="str">"node"</span>: <span class="str">"tool"</span>, <span class="str">"tool"</span>: name, <span class="str">"results"</span>: len(output)}]}
+
+<span class="kw">def</span> <span class="fn">route_decision</span>(state: AgentState) -&gt; Literal[<span class="str">"tool"</span>, <span class="str">"synthesize"</span>]:
+    <span class="cmt">"""The conditional edge: the planner's choice, read back out of state."""</span>
+    <span class="kw">return</span> <span class="str">"tool"</span> <span class="kw">if</span> state.get(<span class="str">"route"</span>) == <span class="str">"tool"</span> <span class="kw">else</span> <span class="str">"synthesize"</span></code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">wiring and compiling the graph</span><button class="copy">copy</button></div>
+<pre><code><span class="kw">from</span> langgraph.graph <span class="kw">import</span> END, START, StateGraph
+
+g = StateGraph(AgentState)
+g.add_node(<span class="str">"router"</span>, router_node)
+g.add_node(<span class="str">"tool"</span>, tool_node)
+g.add_node(<span class="str">"synthesize"</span>, synthesize_node)
+
+g.add_edge(START, <span class="str">"router"</span>)
+g.add_conditional_edges(<span class="str">"router"</span>, route_decision,
+                        {<span class="str">"tool"</span>: <span class="str">"tool"</span>, <span class="str">"synthesize"</span>: <span class="str">"synthesize"</span>})
+g.add_edge(<span class="str">"tool"</span>, <span class="str">"synthesize"</span>)   <span class="cmt"># tool results always flow onward…</span>
+g.add_edge(<span class="str">"synthesize"</span>, END)       <span class="cmt"># …route it back to "router" instead for a true cycle</span>
+
+graph = g.compile()                   <span class="cmt"># validates topology once, at import</span>
+state = <span class="kw">await</span> graph.ainvoke({<span class="str">"question"</span>: q, <span class="str">"trace"</span>: []})</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge curl">curl</span><span class="path">both branches, with the trace</span><button class="copy">copy</button></div>
+<pre><code><span class="cmt"># needs evidence → router picks the tool branch: router → tool → synthesize</span>
+curl -s -X POST localhost:8000/agent/chat -H <span class="str">"content-type: application/json"</span> \
+  -d <span class="str">'{"message":"According to the document, how do I run the server?"}'</span> | python3 -m json.tool
+
+<span class="cmt"># live state → service_status tool</span>
+curl -s -X POST localhost:8000/agent/chat -H <span class="str">"content-type: application/json"</span> \
+  -d <span class="str">'{"message":"what is the api status?"}'</span> | python3 -m json.tool
+
+<span class="cmt"># chit-chat → direct branch, tool node skipped entirely</span>
+curl -s -X POST localhost:8000/agent/chat -H <span class="str">"content-type: application/json"</span> \
+  -d <span class="str">'{"message":"hi"}'</span> | python3 -m json.tool</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codebar"><span class="badge py">python</span><span class="path">response shape — the trace is the product</span><button class="copy">copy</button></div>
+<pre><code>{
+  <span class="str">"answer"</span>: <span class="str">"Run `uv run fastapi dev app/main.py` [README.md#0]."</span>,
+  <span class="str">"route"</span>: <span class="str">"tool"</span>,
+  <span class="str">"reason"</span>: <span class="str">"question likely needs grounded evidence"</span>,
+  <span class="str">"citations"</span>: [{<span class="str">"source"</span>: <span class="str">"README.md"</span>, <span class="str">"chunk"</span>: <span class="ann">0</span>, <span class="str">"score"</span>: <span class="ann">0.71</span>}],
+  <span class="str">"trace"</span>: [
+    {<span class="str">"node"</span>: <span class="str">"router"</span>,     <span class="str">"decision"</span>: <span class="str">"tool"</span>, <span class="str">"tool"</span>: <span class="str">"vector_search"</span>, <span class="str">"ms"</span>: <span class="ann">0.1</span>},
+    {<span class="str">"node"</span>: <span class="str">"tool"</span>,       <span class="str">"results"</span>: <span class="ann">4</span>, <span class="str">"top_score"</span>: <span class="ann">0.71</span>,            <span class="str">"ms"</span>: <span class="ann">12.4</span>},
+    {<span class="str">"node"</span>: <span class="str">"synthesize"</span>, <span class="str">"grounded"</span>: <span class="kw">true</span>, <span class="str">"context_chunks"</span>: <span class="ann">4</span>,     <span class="str">"ms"</span>: <span class="ann">880.2</span>}
+  ],
+  <span class="str">"engine"</span>: <span class="str">"langgraph"</span>, <span class="str">"total_ms"</span>: <span class="ann">893.0</span>
+}</code></pre>
+      </div>
+
+      <div class="note danger"><b>Three guards before any agent ships.</b> <b>Step budget</b> — a cyclic graph can loop forever; cap recursion and return a partial answer when you hit it. <b>Timeout per node</b> — one hung tool call must not hold the request open. <b>Tool allowlist</b> — never let a model name an arbitrary callable; map a closed set of names to functions, exactly as <code>TOOLS</code> does here, so prompt injection cannot reach anything you did not choose to expose.</div>
+    </div>
+  </div>
+</section>
+
+<hr />
+
+<section id="wrap">
+  <div class="sec-head">
+    <span class="idx">★</span>
+    <div>
+      <h2>Where to go next</h2>
+      <div class="tagline">The gaps between this reference project and a service on call.</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Area</th><th>In this project</th><th>Production step</th></tr></thead>
+    <tbody>
+      <tr><td>Schema</td><td><code>create_all()</code> in lifespan</td><td>Alembic migrations in CI, reviewed like code</td></tr>
+      <tr><td>Database</td><td>SQLite + aiosqlite</td><td>Postgres + asyncpg; tune <code>pool_size</code>/<code>max_overflow</code> per worker</td></tr>
+      <tr><td>Tokens</td><td>HS256, no revocation</td><td>RS256, rotate refresh tokens, persist <code>jti</code> denylist</td></tr>
+      <tr><td>Observability</td><td>timing + correlation headers</td><td>structured JSON logs, OpenTelemetry traces, RED metrics</td></tr>
+      <tr><td>Background work</td><td><code>BackgroundTasks</code></td><td>ARQ / Celery with retries, dead-letter queue, idempotency keys</td></tr>
+      <tr><td>Rate limiting</td><td>none</td><td>per-token quotas at the edge — LLM endpoints are expensive to abuse</td></tr>
+      <tr><td>RAG quality</td><td>top-k cosine</td><td>hybrid BM25 + vector, reranker, score floor, eval set with regression gates</td></tr>
+      <tr><td>Agent safety</td><td>tool allowlist</td><td>step budget, per-node timeouts, output schema validation, prompt-injection tests</td></tr>
+    </tbody>
+  </table>
+
+  <div class="codeblock">
+    <div class="codebar"><span class="badge zsh">macOS zsh</span><span class="path">daily loop</span><button class="copy">copy</button></div>
+<pre><code>uv sync                                   <span class="cmt"># match the lockfile exactly</span>
+uv run fastapi dev app/main.py            <span class="cmt"># reload server + /docs</span>
+uv run pytest -q                          <span class="cmt"># 7 end-to-end tests, no live server needed</span>
+uv run ruff check . --fix &amp;&amp; uv run ruff format .</code></pre>
+  </div>
+</section>
+
+<footer>
+  <p>Thirteen lessons · the runnable project lives beside this file in <code>app/</code> · every snippet above is real code from it.</p>
+</footer>
+
+</main>
+</div>
+
+<script>
+/* ---------------------------------------------------------------- theme */
+(function () {
+  const root = document.documentElement;
+  const btn = document.getElementById("themeBtn");
+  const label = document.getElementById("themeLabel");
+  const KEY = "fam.theme";
+
+  const apply = (t) => {
+    root.dataset.theme = t;
+    label.textContent = t + " mode";
+  };
+  let saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  apply(saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
+
+  btn.addEventListener("click", () => {
+    const next = root.dataset.theme === "dark" ? "light" : "dark";
+    apply(next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+  });
+})();
+
+/* ------------------------------------------------------------ progress */
+(function () {
+  const KEY = "fam.progress.v1";
+  const boxes = Array.from(document.querySelectorAll(".lesson-check input[data-lesson]"));
+  const fill = document.getElementById("barFill");
+  const pct = document.getElementById("pctLabel");
+
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } };
+  const save = (s) => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} };
+
+  function render(state) {
+    let done = 0;
+    boxes.forEach((b) => {
+      const on = !!state[b.dataset.lesson];
+      b.checked = on;
+      b.closest(".lesson-check").classList.toggle("on", on);
+      const link = document.querySelector('nav a[href="#' + b.closest("section").id + '"]');
+      if (link) link.classList.toggle("done", on);
+      if (on) done++;
+    });
+    const p = boxes.length ? Math.round((done / boxes.length) * 100) : 0;
+    fill.style.width = p + "%";
+    pct.textContent = p + "%";
+  }
+
+  let state = load();
+  render(state);
+
+  boxes.forEach((b) =>
+    b.addEventListener("change", () => {
+      state[b.dataset.lesson] = b.checked;
+      save(state);
+      render(state);
+    })
+  );
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    state = {};
+    save(state);
+    render(state);
+  });
+})();
+
+/* ----------------------------------------------------------- scrollspy */
+(function () {
+  const links = Array.from(document.querySelectorAll("nav a.nav-link"));
+  const sections = links
+    .map((l) => document.querySelector(l.getAttribute("href")))
+    .filter(Boolean);
+
+  const setActive = (id) =>
+    links.forEach((l) => l.classList.toggle("active", l.getAttribute("href") === "#" + id));
+
+  const obs = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible.length) setActive(visible[0].target.id);
+    },
+    { rootMargin: "-12% 0px -72% 0px", threshold: [0, 0.2, 1] }
+  );
+  sections.forEach((s) => obs.observe(s));
+})();
+
+/* ---------------------------------------------------------------- copy */
+(function () {
+  document.querySelectorAll(".codeblock .copy").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const code = btn.closest(".codeblock").querySelector("pre code");
+      const text = code ? code.textContent : "";
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (_) {}
+        ta.remove();
+      }
+      btn.textContent = "copied";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = "copy";
+        btn.classList.remove("copied");
+      }, 1400);
+    });
+  });
+})();
+
+/* ----------------------------------------------------------- simulator */
+(function () {
+  const N = 6;              // concurrent requests
+  const WORK = 1.0;         // seconds of work per request
+  const SPAN = 7;           // seconds on the virtual timeline
+  const REAL_MS = 3200;     // how long the animation takes in real time
+
+  const MODES = {
+    "async-good": {
+      label: "async def + await",
+      endpoint: "GET /lab/async-good",
+      blurb:
+        "<b>async def</b> with <code>await asyncio.sleep()</code>. Each request yields the event loop the moment it hits I/O, so all six overlap on one thread and finish in ~1s. /health answers instantly throughout. This is the shape you want for every DB and HTTP call.",
+      build() {
+        const lanes = [{ name: "event loop", segs: [] }];
+        for (let i = 0; i < N; i++) {
+          lanes.push({ name: "req " + (i + 1), segs: [{ t0: 0.05, t1: 0.05 + WORK, cls: "run", tag: "awaiting I/O" }] });
+          lanes[0].segs.push({ t0: 0.05 + i * 0.01, t1: 0.05 + i * 0.01 + 0.04, cls: "run" });
+        }
+        lanes.push({ name: "/health probe", segs: [{ t0: 0.5, t1: 0.56, cls: "hb", tag: "4 ms" }] });
+        return { lanes, finish: 1.05, health: 4, verdict: "ok" };
+      },
+    },
+    "async-bad": {
+      label: "async def + blocking call",
+      endpoint: "GET /lab/async-bad",
+      blurb:
+        "<b>The outage.</b> <code>time.sleep()</code> inside <code>async def</code> never yields, so the single loop thread is pinned. Requests serialize: 1s, 2s, 3s… and <code>/health</code> waits behind all of them. Note that nothing errors — the server just goes quiet. One sync DB driver or one <code>requests.get()</code> does exactly this.",
+      build() {
+        const lanes = [{ name: "event loop", segs: [] }];
+        for (let i = 0; i < N; i++) {
+          const t0 = 0.05 + i * WORK;
+          lanes.push({
+            name: "req " + (i + 1),
+            segs: [
+              ...(i ? [{ t0: 0.05, t1: t0, cls: "wait", tag: i === 1 ? "queued" : "" }] : []),
+              { t0, t1: t0 + WORK, cls: "block", tag: "BLOCKING" },
+            ],
+          });
+          lanes[0].segs.push({ t0, t1: t0 + WORK, cls: "block" });
+        }
+        lanes.push({
+          name: "/health probe",
+          segs: [
+            { t0: 0.5, t1: 6.05, cls: "wait", tag: "starved 5.5 s" },
+            { t0: 6.05, t1: 6.11, cls: "hb" },
+          ],
+        });
+        return { lanes, finish: 6.05, health: 5550, verdict: "bad" };
+      },
+    },
+    "sync-def": {
+      label: "plain def → threadpool",
+      endpoint: "GET /lab/sync-def",
+      blurb:
+        "A plain <b>def</b> route. FastAPI moves it to AnyIO's worker threadpool (40 threads), so blocking is contained: six requests run on six threads in ~1s and the loop stays free for <code>/health</code>. Safe for sync libraries — but the pool is a hard ceiling, and thread 41 queues.",
+      build() {
+        const lanes = [{ name: "event loop", segs: [{ t0: 0.02, t1: 0.1, cls: "run", tag: "dispatching" }] }];
+        for (let i = 0; i < N; i++) {
+          lanes.push({
+            name: "thread " + (i + 1),
+            segs: [{ t0: 0.08 + i * 0.015, t1: 0.08 + i * 0.015 + WORK, cls: "run", tag: "req " + (i + 1) + " · blocking safely" }],
+          });
+        }
+        lanes.push({ name: "/health probe", segs: [{ t0: 0.5, t1: 0.57, cls: "hb", tag: "6 ms" }] });
+        return { lanes, finish: 1.17, health: 6, verdict: "ok" };
+      },
+    },
+    "cpu-thread": {
+      label: "CPU work in a thread (GIL)",
+      endpoint: "GET /lab/cpu-in-thread",
+      blurb:
+        "Same threadpool, but the work is <b>CPU-bound</b>. Only one thread can hold the GIL, so the six requests interleave in slices and still take ~6s in total. Threads fix blocking I/O; they do not add CPU throughput. The loop does stay responsive.",
+      build() {
+        const lanes = [{ name: "event loop", segs: [{ t0: 0.02, t1: 0.1, cls: "run", tag: "dispatching" }] }];
+        const slice = 0.2;
+        for (let i = 0; i < N; i++) {
+          const segs = [];
+          for (let s = 0; s < WORK / slice; s++) {
+            const t0 = 0.08 + (s * N + i) * slice;
+            segs.push({ t0, t1: t0 + slice, cls: "run", tag: s === 0 ? "GIL slice" : "" });
+          }
+          lanes.push({ name: "thread " + (i + 1), segs });
+        }
+        lanes.push({ name: "/health probe", segs: [{ t0: 0.5, t1: 0.58, cls: "hb", tag: "9 ms" }] });
+        return { lanes, finish: 6.08, health: 9, verdict: "bad" };
+      },
+    },
+    "cpu-process": {
+      label: "ProcessPoolExecutor",
+      endpoint: "GET /lab/cpu-in-process",
+      blurb:
+        "<b>Real parallelism.</b> Each worker is its own interpreter with its own GIL, so a pool of 3 chews through six CPU-bound requests in two waves (~2s + pickling overhead). The cost is IPC: arguments and results are pickled, and on macOS each worker is <code>spawn</code>ed, re-importing your module.",
+      build() {
+        const W = 3;
+        const lanes = [{ name: "event loop", segs: [{ t0: 0.02, t1: 0.12, cls: "run", tag: "submitting" }] }];
+        const finishOf = [];
+        for (let w = 0; w < W; w++) {
+          const segs = [];
+          for (let wave = 0; wave < N / W; wave++) {
+            const t0 = 0.12 + wave * (WORK + 0.12);
+            segs.push({ t0, t1: t0 + 0.1, cls: "wait", tag: "pickle" });
+            segs.push({ t0: t0 + 0.1, t1: t0 + 0.1 + WORK, cls: "run", tag: "req " + (wave * W + w + 1) + " · own GIL" });
+            finishOf.push(t0 + 0.1 + WORK);
+          }
+          lanes.push({ name: "process " + (w + 1), segs });
+        }
+        lanes.push({ name: "/health probe", segs: [{ t0: 0.5, t1: 0.57, cls: "hb", tag: "5 ms" }] });
+        return { lanes, finish: Math.max(...finishOf), health: 5, verdict: "ok" };
+      },
+    },
+  };
+
+  const modesEl = document.getElementById("simModes");
+  const lanesEl = document.getElementById("simLanes");
+  const ticksEl = document.getElementById("simTicks");
+  const explainEl = document.getElementById("simExplain");
+  const verdictEl = document.getElementById("simVerdict");
+  const runBtn = document.getElementById("simRun");
+  const resetBtn = document.getElementById("simReset");
+
+  let current = "async-good";
+  let raf = null;
+
+  for (let i = 0; i <= SPAN; i++) {
+    const s = document.createElement("span");
+    s.textContent = i + "s";
+    ticksEl.appendChild(s);
+  }
+
+  Object.entries(MODES).forEach(([key, m]) => {
+    const b = document.createElement("button");
+    b.className = "mode" + (key === current ? " sel" : "");
+    b.textContent = m.label;
+    b.dataset.key = key;
+    b.addEventListener("click", () => {
+      current = key;
+      modesEl.querySelectorAll(".mode").forEach((x) => x.classList.toggle("sel", x.dataset.key === key));
+      draw(0);
+    });
+    modesEl.appendChild(b);
+  });
+
+  function draw(progress) {
+    const mode = MODES[current];
+    const model = mode.build();
+    const now = progress * SPAN;
+
+    explainEl.innerHTML = "<code class='mono'>" + mode.endpoint + "</code> — " + mode.blurb;
+
+    lanesEl.innerHTML = "";
+    model.lanes.forEach((lane) => {
+      const row = document.createElement("div");
+      row.className = "lane";
+      const nm = document.createElement("div");
+      nm.className = "name";
+      nm.textContent = lane.name;
+      const track = document.createElement("div");
+      track.className = "track";
+
+      lane.segs.forEach((seg) => {
+        const visEnd = Math.min(seg.t1, now);
+        if (visEnd <= seg.t0) return;
+        const el = document.createElement("div");
+        el.className = "seg " + seg.cls;
+        el.style.left = (seg.t0 / SPAN) * 100 + "%";
+        el.style.width = ((visEnd - seg.t0) / SPAN) * 100 + "%";
+        if (seg.tag && visEnd - seg.t0 > 0.45) {
+          const t = document.createElement("span");
+          t.className = "tag";
+          t.textContent = seg.tag;
+          el.appendChild(t);
+        }
+        track.appendChild(el);
+      });
+
+      if (progress > 0 && progress < 1) {
+        const ph = document.createElement("div");
+        ph.className = "playhead";
+        ph.style.left = progress * 100 + "%";
+        track.appendChild(ph);
+      }
+      row.append(nm, track);
+      lanesEl.appendChild(row);
+    });
+
+    const settled = progress >= 1;
+    const stats = [
+      ["all 6 done in", settled ? model.finish.toFixed(2) + "s" : "…", model.verdict],
+      ["/health latency", settled ? (model.health >= 1000 ? (model.health / 1000).toFixed(1) + "s" : model.health + "ms") : "…", model.health > 100 ? "bad" : "ok"],
+      ["effective concurrency", settled ? (N / model.finish).toFixed(1) + " req/s" : "…", model.verdict],
+      ["parallel CPU", current === "cpu-process" ? "yes · 3 cores" : "no · 1 GIL", current === "cpu-process" ? "ok" : ""],
+    ];
+    verdictEl.innerHTML = stats
+      .map(
+        ([k, v, cls]) =>
+          '<div class="stat ' + (settled ? cls : "") + '"><div class="k">' + k + '</div><div class="v">' + v + "</div></div>"
+      )
+      .join("");
+  }
+
+  function run() {
+    if (raf) cancelAnimationFrame(raf);
+    const t0 = performance.now();
+    const step = (t) => {
+      const p = Math.min((t - t0) / REAL_MS, 1);
+      draw(p);
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+
+  runBtn.addEventListener("click", run);
+  resetBtn.addEventListener("click", () => {
+    if (raf) cancelAnimationFrame(raf);
+    draw(0);
+  });
+
+  draw(0);
+})();
+</script>
+</body>
+</html>
